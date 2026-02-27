@@ -1,0 +1,356 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.navbar {
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar .nav-link {
+    color: #000 !important;
+    font-weight: 600;
+}
+
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                url('https://images.unsplash.com/photo-1510590337019-5ef8d3d32116?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+    height: 80vh;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+}
+
+.hero-logo {
+    max-width: 150px;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+}
+
+.card {
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+/* Estilo para los iconos de recursos */
+.fa-3x {
+    color: #ff4d4d; /* Un rojo llamativo como el de los logos */
+    margin-bottom: 15px;
+}
+
+/* Redondear las fotos de los pastores */
+.rounded-circle {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    margin: 0 auto;
+}
+
+/* Animación suave para toda la página */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Estilo para los reproductores de audio */
+.audio-card {
+    border-left: 5px solid #dc3545; /* Color rojo de tu logo */
+    transition: 0.3s;
+}
+
+.audio-card:hover {
+    transform: scale(1.02);
+}
+
+.custom-audio {
+    height: 35px;
+}
+
+/* Para navegadores modernos, le damos un toque gris suave */
+audio::-webkit-media-controls-panel {
+    background-color: #f8f9fa;
+}
+
+#eventos-especiales {
+    background: linear-gradient(45deg, #000000, #1a1a1a);
+    border-bottom: 4px solid #dc3545;
+}
+
+.event-details span {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+#eventos-especiales img {
+    transition: transform 0.5s ease;
+}
+
+#eventos-especiales img:hover {
+    transform: scale(1.03);
+}
+.rounded-4 {
+    border-radius: 1.5rem !important;
+}
+
+#vision-mision h3 {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+#vision-mision p {
+    line-height: 1.8;
+}
+
+.galeria-item img {
+    width: 100%;
+    height: 250px; /* Forzamos a que todas las miniaturas sean iguales */
+    object-fit: cover;
+    transition: all 0.4s ease;
+    cursor: pointer;
+}
+
+.galeria-item img:hover {
+    filter: brightness(70%);
+    transform: scale(1.05);
+}
+
+#galeria {
+    background-color: #fdfdfd;
+}
+
+.galeria-item-v2 {
+    transition: all 0.5s ease;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#galeria .btn-outline-danger.active {
+    background-color: #dc3545;
+    color: white;
+}
+
+.galeria-item-v2 img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+.galeria-item-v2 img:hover {
+    border-color: #dc3545;
+    transform: scale(1.02);
+}
+
+.form-control, .form-select {
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+#contacto {
+    border-top: 1px solid #eee;
+}
+#donaciones {
+    /* Aquí puedes poner una foto de tu iglesia o una imagen de manos sembrando/mapa */
+    background-image: url('https://images.unsplash.com/photo-1532622722190-68a51a762d50?auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Efecto Parallax muy elegante */
+}
+
+.donacion-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.4));
+    z-index: 1;
+}
+
+.rounded-4 {
+    border-radius: 1.5rem !important;
+}
+
+.schedule-card {
+    background: #fff;
+    transition: transform 0.3s ease;
+}
+
+.schedule-card:hover {
+    transform: translateY(-5px);
+}
+
+.icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.time-item {
+    padding: 15px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.time-item:last-child {
+    border-bottom: none;
+}
+
+.time {
+    display: block;
+    color: #dc3545;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.day-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.activity {
+    font-size: 1.1rem;
+    color: #212529;
+}
+
+.time-item.highlight {
+    background-color: rgba(220, 53, 69, 0.03);
+    padding: 15px;
+    margin: 5px -15px;
+    border-radius: 8px;
+    border-bottom: none;
+}
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    transform: translateY(-5px);
+    border-color: #dc3545 !important;
+}
+
+.text-decoration-none:hover {
+    color: #dc3545 !important;
+}
+
+.libro-tapa {
+    width: 100%;
+    height: 300px; /* Ajusta según el tamaño de tus portadas */
+    object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #eee;
+}
+
+.libro-tapa:hover {
+    transform: scale(1.05) rotate(1deg); /* Efecto de movimiento leve */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.libro-card h6 {
+    color: #333;
+    margin-top: 10px;
+}
+
+/* Efectos para las portadas de los libros */
+.libro-tapa {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 5px 15px 15px 5px !important; /* Efecto de lomo de libro */
+    transition: all 0.3s ease;
+    border-left: 4px solid #888; /* Simula el lomo */
+}
+
+.libro-card:hover .libro-tapa {
+    transform: translateY(-10px) rotate(-1deg);
+    box-shadow: 10px 15px 30px rgba(0,0,0,0.3) !important;
+}
+
+.libro-card {
+    padding: 10px;
+}
+
+/* Efecto suave al hacer clic en los botones de ancla */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Estado inicial: Transparente */
+.navbar-transparente {
+    background-color: transparent !important;
+    transition: all 0.4s ease-in-out;
+    padding: 20px 0;
+}
+
+/* Estado al bajar: Sólido y elegante (como Prescott) */
+.navbar-solida {
+    background-color: #ffffff !important;
+    padding: 10px 0;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+/* Cambiar color de los textos cuando la barra se vuelve blanca */
+.navbar-solida .nav-link {
+    color: #000000 !important;
+}
+
+.navbar-solida .navbar-brand {
+    color: #000000 !important;
+}
+
+/* El botón de donar siempre se mantiene rojo */
+.navbar .btn-danger {
+    color: #fff !important;
+}
+
+/* Tamaño del logo cuando la barra es transparente (al inicio) */
+.logo-principal {
+    height: 70px; /* Ajusta este número para que se vea tan grande como quieras */
+    width: auto;
+    transition: all 0.4s ease-in-out;
+    filter: drop-shadow(0px 0px 5px rgba(255,255,255,0.2));
+}
+
+/* Tamaño del logo cuando el usuario baja (barra sólida) */
+.navbar-solida .logo-principal {
+    height: 55px; /* Se achica un poco al bajar para no tapar contenido */
+}
+
+/* Ajuste para que el menú no se pegue al logo en móviles */
+@media (max-width: 768px) {
+    .logo-principal {
+        height: 60px;
+    }
+}
+
+#ubicacion .bg-dark p {
+    color: rgba(255, 255, 255, 0.7) !important; /* Blanco suave */
+    display: block !important; /* Asegura que no esté oculto */
+}
+
+#ubicacion h6 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
