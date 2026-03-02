@@ -605,158 +605,120 @@
 		</div>
 	</section>
 
-    <footer class="bg-dark text-white py-4 text-center">
-        <p>Joaquín V. González 1265, José C. Paz | Tel: 1141662895</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-		
-	<script>
-	function filtrarGaleria(categoria) {
-		const items = document.querySelectorAll('.galeria-item-v2');
-		const botones = document.querySelectorAll('#galeria .btn');
-
-		// Cambiar estado activo de los botones
-		botones.forEach(btn => btn.classList.remove('active'));
-		event.target.classList.add('active');
-
-		items.forEach(item => {
-			if (categoria === 'todos') {
-				item.style.display = 'block';
-			} else {
-				if (item.classList.contains(categoria)) {
-					item.style.display = 'block';
-				} else {
-					item.style.display = 'none';
-				}
-			}
-		});
-	}
-	function copiarAlias() {
-		const alias = "iccjosecpaz";
-		navigator.clipboard.writeText(alias).then(() => {
-			alert("Alias copiado: " + alias + ". ¡Gracias por tu generosidad!");
-		});
-	}
-	</script>
-	<script>
-		window.onscroll = function() {
-			var navbar = document.getElementById('mainNavbar');
-			// Si el usuario bajó más de 50 pixeles
-			if (window.scrollY > 50) {
-				navbar.classList.add('navbar-solida');
-				navbar.classList.remove('navbar-transparente');
-				navbar.classList.remove('navbar-dark'); // Quita el modo oscuro
-				navbar.classList.add('navbar-light');   // Pone modo claro (letras negras)
-			} else {
-				navbar.classList.remove('navbar-solida');
-				navbar.classList.add('navbar-transparente');
-				navbar.classList.add('navbar-dark');    // Pone modo oscuro (letras blancas)
-				navbar.classList.remove('navbar-light');
-			}
-		};
-	<script>
-	const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
-	const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
+	<footer class="bg-dark text-white py-4 text-center">
+	        <p>Joaquín V. González 1265, José C. Paz | Tel: 1141662895</p>
+	    </footer>
 	
-	// Función maestra para limpiar y corregir links de Drive al vuelo
-	function formatearLink(url) {
-	    if (!url) return "";
-	    let link = url.replace(/["']/g, "").trim();
-	    if (link.includes("drive.google.com")) {
-	        let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
-	        if (id) {
-	            // Si es audio usamos export=download, si es imagen export=view
-	            return `https://docs.google.com/uc?export=download&id=${id[1]}`;
+	    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	
+	    <script>
+	    // --- CONFIGURACIÓN DE GALERÍA ---
+	    const configuracionGaleria = {
+	        evangelismos: 1, 
+	        newman: 5,
+	        guarderia: 8,
+	        rally: 12
+	    };
+	
+	    function generarAlbum(categoria) {
+	        const contenedor = document.getElementById('contenedor-galeria');
+	        if(!contenedor) return;
+	        contenedor.innerHTML = ''; 
+	
+	        const categoriasAMostrar = categoria === 'todos' ? Object.keys(configuracionGaleria) : [categoria];
+	
+	        categoriasAMostrar.forEach(cat => {
+	            for (let i = 1; i <= configuracionGaleria[cat]; i++) {
+	                const div = document.createElement('div');
+	                div.className = `col-6 col-md-4 col-lg-3 galeria-item-v2 ${cat}`;
+	                div.innerHTML = `
+	                    <a href="img/${cat}/${i}.jpg" target="_blank">
+	                        <img src="img/${cat}/${i}.jpg" class="img-fluid rounded shadow-sm" 
+	                             onerror="this.parentElement.parentElement.remove();" alt="${cat}">
+	                    </a>`;
+	                contenedor.appendChild(div);
+	            }
+	        });
+	    }
+	
+	    // --- CARGA DE DATOS DESDE GOOGLE SHEETS ---
+	    const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
+	    const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
+	
+	    function formatearLink(url) {
+	        if (!url) return "";
+	        let link = url.replace(/["']/g, "").trim();
+	        if (link.includes("drive.google.com")) {
+	            let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
+	            if (id) return `https://docs.google.com/uc?export=download&id=${id[1]}`;
 	        }
-	    }
-	    return link;
-	}
-	
-	// Separador inteligente que respeta comas dentro de comillas
-	function dividirFila(fila) {
-	    const resultado = [];
-	    let celda = '';
-	    let dentroComillas = false;
-	    for (let char of fila) {
-	        if (char === '"') dentroComillas = !dentroComillas;
-	        else if (char === ',' && !dentroComillas) {
-	            resultado.push(celda);
-	            celda = '';
-	        } else celda += char;
-	    }
-	    resultado.push(celda);
-	    return resultado;
-	}
-	
-	async function cargarDatos() {
-	    // 1. CARGAR SERMONES
-	    try {
-	        const res = await fetch(urlSermones + "&t=" + new Date().getTime()); // Evita caché
-	        const data = await res.text();
-	        const filas = data.split(/\r?\n/).slice(1);
-	        const contenedor = document.getElementById('contenedor-sermones');
-	        let html = '';
-	
-	        filas.forEach(f => {
-	            const col = dividirFila(f);
-	            if (col.length >= 3 && col[0].trim() !== "") {
-	                const linkAudio = formatearLink(col[2]);
-	                html += `
-	                <div class="audio-card d-flex align-items-center mb-3 p-3 bg-white shadow-sm rounded border-start border-danger border-4">
-	                    <div class="flex-grow-1 ms-3">
-	                        <h6 class="mb-0 fw-bold text-dark">${col[0].replace(/"/g, "")}</h6>
-	                        <small class="text-muted">${col[1].replace(/"/g, "")}</small>
-	                        <audio controls class="w-100 mt-2">
-	                            <source src="${linkAudio}" type="audio/mpeg">
-	                            Tu navegador no soporta audio.
-	                        </audio>
-	                    </div>
-	                </div>`;
-	            }
-	        });
-	        contenedor.innerHTML = html || '<p class="text-center">No hay sermones por ahora.</p>';
-	    } catch (e) { 
-	        document.getElementById('contenedor-sermones').innerHTML = "Error al conectar con Google Sheets.";
+	        return link;
 	    }
 	
-	    // 2. CARGAR LIBROS
-	    try {
-	        const res = await fetch(urlLibros + "&t=" + new Date().getTime());
-	        const data = await res.text();
-	        const filas = data.split(/\r?\n/).slice(1);
-	        const contenedor = document.getElementById('contenedor-libros');
-	        let html = '';
+	    async function cargarDatos() {
+	        // Cargar Sermones
+	        try {
+	            const res = await fetch(urlSermones + "&cache=" + Date.now());
+	            const data = await res.text();
+	            const filas = data.split(/\r?\n/).slice(1);
+	            const cont = document.getElementById('contenedor-sermones');
+	            let html = '';
+	            filas.forEach(f => {
+	                const col = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	                if(col.length >= 3 && col[0].trim() !== "") {
+	                    html += `<div class="audio-card d-flex align-items-center mb-3 p-3 bg-white shadow rounded border-start border-danger border-4">
+	                        <div class="flex-grow-1 ms-3">
+	                            <h6 class="mb-0 fw-bold">${col[0].replace(/"/g, "")}</h6>
+	                            <small class="text-muted">${col[1].replace(/"/g, "")}</small>
+	                            <audio controls class="w-100 mt-2"><source src="${formatearLink(col[2])}" type="audio/mpeg"></audio>
+	                        </div>
+	                    </div>`;
+	                }
+	            });
+	            cont.innerHTML = html || '<p>No hay sermones.</p>';
+	        } catch (e) { console.error(e); }
 	
-	        filas.forEach(f => {
-	            const col = dividirFila(f);
-	            if (col.length >= 4 && col[0].trim() !== "") {
-	                const imgUrl = formatearLink(col[2]).replace("download", "view"); // Para imagen usamos view
-	                const pdfUrl = col[3].replace(/["']/g, "").trim();
-	                html += `
-	                <div class="col-6 col-md-3 mb-4">
-	                    <div class="libro-card text-center">
-	                        <a href="${pdfUrl}" target="_blank">
-	                            <img src="${imgUrl}" class="img-fluid rounded shadow-sm mb-2" style="height:200px; width:100%; object-fit:cover; background:#eee;" onerror="this.src='https://via.placeholder.com/200x280?text=Libro'">
-	                        </a>
-	                        <h6 class="fw-bold text-dark mb-0 small">${col[0].replace(/"/g, "")}</h6>
-	                        <p class="text-muted small">${col[1].replace(/"/g, "")}</p>
-	                    </div>
-	                </div>`;
-	            }
-	        });
-	        contenedor.innerHTML = html || '<p class="text-center">No hay libros por ahora.</p>';
-	    } catch (e) { 
-	        document.getElementById('contenedor-libros').innerHTML = "Error al conectar con Google Sheets.";
+	        // Cargar Libros
+	        try {
+	            const res = await fetch(urlLibros + "&cache=" + Date.now());
+	            const data = await res.text();
+	            const filas = data.split(/\r?\n/).slice(1);
+	            const cont = document.getElementById('contenedor-libros');
+	            let html = '';
+	            filas.forEach(f => {
+	                const col = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	                if(col.length >= 4 && col[0].trim() !== "") {
+	                    let img = formatearLink(col[2]);
+	                    html += `<div class="col-6 col-md-3 mb-4">
+	                        <div class="libro-card text-center">
+	                            <a href="${col[3].trim()}" target="_blank">
+	                                <img src="${img}" class="img-fluid rounded shadow mb-2" style="height:200px;object-fit:cover;">
+	                            </a>
+	                            <h6 class="fw-bold mb-0 small">${col[0].replace(/"/g, "")}</h6>
+	                        </div>
+	                    </div>`;
+	                }
+	            });
+	            cont.innerHTML = html || '<p>No hay libros.</p>';
+	        } catch (e) { console.error(e); }
 	    }
-	}
 	
-	document.addEventListener('DOMContentLoaded', cargarDatos);
-	</script>
+	    // --- UTILIDADES ---
+	    function copiarAlias() {
+	        navigator.clipboard.writeText("iccjosecpaz").then(() => alert("Alias copiado"));
+	    }
+	
+	    window.onload = () => {
+	        generarAlbum('todos');
+	        cargarDatos();
+	    };
+	    </script>
 	
 </body>
 
 </html>
+
 
 
 
