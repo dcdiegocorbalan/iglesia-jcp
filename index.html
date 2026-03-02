@@ -691,68 +691,65 @@
 		};
 	</script>
 
+<script>
+// Pega aquí tus dos enlaces correspondientes
+const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
+const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
 
-	<script>
-        const urlExcel = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?output=csv";
+async function cargarTodo() {
+    // 1. CARGAR SERMONES
+    try {
+        const resS = await fetch(urlSermones);
+        const csvS = await resS.text();
+        const filasS = csvS.split('\n').slice(1);
+        const contSermones = document.getElementById('contenedor-sermones');
+        contSermones.innerHTML = '';
 
-        async function cargarContenido() {
-            try {
-                const respuesta = await fetch(urlExcel);
-                const texto = await respuesta.text();
-        
-        // Convertimos el CSV en una lista de filas
-                const filas = texto.split('\n').map(row => row.split(','));
-        
-                const contenedorSermones = document.getElementById('contenedor-sermones');
-                const contenedorLibros = document.getElementById('contenedor-libros');
-        
-        // Limpiamos los mensajes de "Cargando..."
-                contenedorSermones.innerHTML = '';
-                contenedorLibros.innerHTML = '';
-
-        // Recorremos el Excel (empezando desde la fila 2 para saltar títulos)
-                for (let i = 1; i < filas.length; i++) {
-                    const [Tipo, Titulo, Subtitulo, Link_Imagen, Link_Archivo] = filas[i];
-
-            // Si la fila es un SERMON
-                    if (Tipo.trim().toLowerCase() === 'sermon') {
-                        contenedorSermones.innerHTML += `
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded shadow-sm border-start border-danger border-4">
-                                    <h5 class="fw-bold mb-1">${Titulo}</h5>
-                                    <p class="text-muted small">${Subtitulo}</p>
-                                    <audio controls class="w-100 mt-2">
-                                        <source src="${Link_Archivo.trim()}" type="audio/mp3">
-                                    </audio>
-                                </div>
-                            </div>`;
-                    }
-
-            // Si la fila es un LIBRO
-                    if (Tipo.trim().toLowerCase() === 'libro') {
-                        contenedorLibros.innerHTML += `
-                            <div class="col-6 col-md-3">
-                                <div class="libro-card">
-                                    <a href="${Link_Archivo.trim()}" target="_blank">
-                                        <img src="${Link_Imagen.trim()}" class="img-fluid rounded shadow libro-tapa mb-3" alt="${Titulo}">
-                                    </a>
-                                    <h6 class="fw-bold text-dark mb-0">${Titulo}</h6>
-                                    <p class="small text-muted">${Subtitulo}</p>
-                                </div>
-                            </div>`;
-                    }
-                }
-            } catch (error) {
-                console.error("Error cargando el Excel:", error);
+        filasS.forEach(fila => {
+            const col = fila.split(',');
+            if(col.length >= 3) {
+                contSermones.innerHTML += `
+                    <div class="audio-card d-flex align-items-center mb-3 p-3 bg-white shadow-sm rounded border-start border-danger border-4">
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 fw-bold">${col[0]}</h6> <small class="text-muted">${col[1]}</small> <audio controls class="w-100 mt-2">
+                                <source src="${col[2].trim()}" type="audio/mp3"> </audio>
+                        </div>
+                    </div>`;
             }
-        }
+        });
+    } catch (e) { console.error("Error Sermones:", e); }
 
-// Ejecutar la carga al abrir la página
-        document.addEventListener('DOMContentLoaded', cargarContenido);
-    </script>
+    // 2. CARGAR LIBROS
+    try {
+        const resL = await fetch(urlLibros);
+        const csvL = await resL.text();
+        const filasL = csvL.split('\n').slice(1);
+        const contLibros = document.getElementById('contenedor-libros');
+        contLibros.innerHTML = '';
+
+        filasL.forEach(fila => {
+            const col = fila.split(',');
+            if(col.length >= 4) {
+                contLibros.innerHTML += `
+                    <div class="col-6 col-md-3">
+                        <div class="libro-card">
+                            <a href="${col[3].trim()}" target="_blank"> <img src="${col[2].trim()}" class="img-fluid rounded shadow libro-tapa mb-2"> </a>
+                            <h6 class="fw-bold text-dark mb-0">${col[0]}</h6> <p class="small text-muted">${col[1]}</p> </div>
+                    </div>`;
+            }
+        });
+    } catch (e) { console.error("Error Libros:", e); }
+}
+
+document.addEventListener('DOMContentLoaded', cargarTodo);
+</script>
+
+
+	
 </body>
 
 </html>
+
 
 
 
