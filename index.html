@@ -619,9 +619,16 @@
     function transformarLink(url) {
         if (!url) return "";
         let link = url.trim().replace(/["']/g, "");
+    
+        // Si ya es un link de uc (como los que me pasó), nos aseguramos que use 'drive.google.com'
+        if (link.includes("docs.google.com/uc") || link.includes("drive.google.com/uc")) {
+            return link.replace("docs.google.com", "drive.google.com");
+        }
+
+        // Si es un link normal de compartir, lo convertimos automáticamente
         if (link.includes("drive.google.com")) {
             let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
-            if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
+            if (id) return "https://drive.google.com/uc?export=download&id=" + id[1];
         }
         return link;
     }
@@ -699,6 +706,7 @@
     </script>
 </body>
 </html>
+
 
 
 
