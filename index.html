@@ -691,8 +691,68 @@
 		};
 	</script>
 
+
+	<script>
+        const urlExcel = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?output=csv";
+
+        async function cargarContenido() {
+            try {
+                const respuesta = await fetch(urlExcel);
+                const texto = await respuesta.text();
+        
+        // Convertimos el CSV en una lista de filas
+                const filas = texto.split('\n').map(row => row.split(','));
+        
+                const contenedorSermones = document.getElementById('contenedor-sermones');
+                const contenedorLibros = document.getElementById('contenedor-libros');
+        
+        // Limpiamos los mensajes de "Cargando..."
+                contenedorSermones.innerHTML = '';
+                contenedorLibros.innerHTML = '';
+
+        // Recorremos el Excel (empezando desde la fila 2 para saltar títulos)
+                for (let i = 1; i < filas.length; i++) {
+                    const [Tipo, Titulo, Subtitulo, Link_Imagen, Link_Archivo] = filas[i];
+
+            // Si la fila es un SERMON
+                    if (Tipo.trim().toLowerCase() === 'sermon') {
+                        contenedorSermones.innerHTML += `
+                            <div class="col-md-6">
+                                <div class="p-4 bg-white rounded shadow-sm border-start border-danger border-4">
+                                    <h5 class="fw-bold mb-1">${Titulo}</h5>
+                                    <p class="text-muted small">${Subtitulo}</p>
+                                    <audio controls class="w-100 mt-2">
+                                        <source src="${Link_Archivo.trim()}" type="audio/mp3">
+                                    </audio>
+                                </div>
+                            </div>`;
+                    }
+
+            // Si la fila es un LIBRO
+                    if (Tipo.trim().toLowerCase() === 'libro') {
+                        contenedorLibros.innerHTML += `
+                            <div class="col-6 col-md-3">
+                                <div class="libro-card">
+                                    <a href="${Link_Archivo.trim()}" target="_blank">
+                                        <img src="${Link_Imagen.trim()}" class="img-fluid rounded shadow libro-tapa mb-3" alt="${Titulo}">
+                                    </a>
+                                    <h6 class="fw-bold text-dark mb-0">${Titulo}</h6>
+                                    <p class="small text-muted">${Subtitulo}</p>
+                                </div>
+                            </div>`;
+                    }
+                }
+            } catch (error) {
+                console.error("Error cargando el Excel:", error);
+            }
+        }
+
+// Ejecutar la carga al abrir la página
+        document.addEventListener('DOMContentLoaded', cargarContenido);
+    </script>
 </body>
 
 </html>
+
 
 
