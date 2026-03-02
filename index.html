@@ -659,63 +659,96 @@
 	const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
 	const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
 	
-	// Función para limpiar los datos que vienen del Excel
-	function limpiar(texto) {
-	    return texto ? texto.replace(/["']/g, "").trim() : "";
+	// Función maestra para limpiar y corregir links de Drive al vuelo
+	function formatearLink(url) {
+	    if (!url) return "";
+	    let link = url.replace(/["']/g, "").trim();
+	    if (link.includes("drive.google.com")) {
+	        let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
+	        if (id) {
+	            // Si es audio usamos export=download, si es imagen export=view
+	            return `https://docs.google.com/uc?export=download&id=${id[1]}`;
+	        }
+	    }
+	    return link;
+	}
+	
+	// Separador inteligente que respeta comas dentro de comillas
+	function dividirFila(fila) {
+	    const resultado = [];
+	    let celda = '';
+	    let dentroComillas = false;
+	    for (let char of fila) {
+	        if (char === '"') dentroComillas = !dentroComillas;
+	        else if (char === ',' && !dentroComillas) {
+	            resultado.push(celda);
+	            celda = '';
+	        } else celda += char;
+	    }
+	    resultado.push(celda);
+	    return resultado;
 	}
 	
 	async function cargarDatos() {
 	    // 1. CARGAR SERMONES
 	    try {
-	        const res = await fetch(urlSermones);
+	        const res = await fetch(urlSermones + "&t=" + new Date().getTime()); // Evita caché
 	        const data = await res.text();
 	        const filas = data.split(/\r?\n/).slice(1);
 	        const contenedor = document.getElementById('contenedor-sermones');
 	        let html = '';
 	
 	        filas.forEach(f => {
-	            const col = f.split(',');
-	            if (col.length >= 3 && col[0] !== "") {
+	            const col = dividirFila(f);
+	            if (col.length >= 3 && col[0].trim() !== "") {
+	                const linkAudio = formatearLink(col[2]);
 	                html += `
 	                <div class="audio-card d-flex align-items-center mb-3 p-3 bg-white shadow-sm rounded border-start border-danger border-4">
 	                    <div class="flex-grow-1 ms-3">
-	                        <h6 class="mb-0 fw-bold">${limpiar(col[0])}</h6>
-	                        <small class="text-muted">${limpiar(col[1])}</small>
+	                        <h6 class="mb-0 fw-bold text-dark">${col[0].replace(/"/g, "")}</h6>
+	                        <small class="text-muted">${col[1].replace(/"/g, "")}</small>
 	                        <audio controls class="w-100 mt-2">
-	                            <source src="${limpiar(col[2])}" type="audio/mpeg">
+	                            <source src="${linkAudio}" type="audio/mpeg">
+	                            Tu navegador no soporta audio.
 	                        </audio>
 	                    </div>
 	                </div>`;
 	            }
 	        });
-	        contenedor.innerHTML = html || '<p class="text-center">No hay sermones disponibles.</p>';
-	    } catch (e) { console.error("Error Sermones:", e); }
+	        contenedor.innerHTML = html || '<p class="text-center">No hay sermones por ahora.</p>';
+	    } catch (e) { 
+	        document.getElementById('contenedor-sermones').innerHTML = "Error al conectar con Google Sheets.";
+	    }
 	
 	    // 2. CARGAR LIBROS
 	    try {
-	        const res = await fetch(urlLibros);
+	        const res = await fetch(urlLibros + "&t=" + new Date().getTime());
 	        const data = await res.text();
 	        const filas = data.split(/\r?\n/).slice(1);
 	        const contenedor = document.getElementById('contenedor-libros');
 	        let html = '';
 	
 	        filas.forEach(f => {
-	            const col = f.split(',');
-	            if (col.length >= 4 && col[0] !== "") {
+	            const col = dividirFila(f);
+	            if (col.length >= 4 && col[0].trim() !== "") {
+	                const imgUrl = formatearLink(col[2]).replace("download", "view"); // Para imagen usamos view
+	                const pdfUrl = col[3].replace(/["']/g, "").trim();
 	                html += `
 	                <div class="col-6 col-md-3 mb-4">
 	                    <div class="libro-card text-center">
-	                        <a href="${limpiar(col[3])}" target="_blank">
-	                            <img src="${limpiar(col[2])}" class="img-fluid rounded shadow-sm mb-2" style="height:200px; object-fit:cover; background:#eee;">
+	                        <a href="${pdfUrl}" target="_blank">
+	                            <img src="${imgUrl}" class="img-fluid rounded shadow-sm mb-2" style="height:200px; width:100%; object-fit:cover; background:#eee;" onerror="this.src='https://via.placeholder.com/200x280?text=Libro'">
 	                        </a>
-	                        <h6 class="fw-bold text-dark mb-0 small">${limpiar(col[0])}</h6>
-	                        <p class="text-muted small">${limpiar(col[1])}</p>
+	                        <h6 class="fw-bold text-dark mb-0 small">${col[0].replace(/"/g, "")}</h6>
+	                        <p class="text-muted small">${col[1].replace(/"/g, "")}</p>
 	                    </div>
 	                </div>`;
 	            }
 	        });
-	        contenedor.innerHTML = html || '<p class="text-center">No hay libros disponibles.</p>';
-	    } catch (e) { console.error("Error Libros:", e); }
+	        contenedor.innerHTML = html || '<p class="text-center">No hay libros por ahora.</p>';
+	    } catch (e) { 
+	        document.getElementById('contenedor-libros').innerHTML = "Error al conectar con Google Sheets.";
+	    }
 	}
 	
 	document.addEventListener('DOMContentLoaded', cargarDatos);
@@ -724,6 +757,7 @@
 </body>
 
 </html>
+
 
 
 
