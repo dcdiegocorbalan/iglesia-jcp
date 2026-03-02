@@ -655,85 +655,88 @@
 				navbar.classList.remove('navbar-light');
 			}
 		};
-	</script>
-
 	<script>
-	    // Enlaces de publicación de Google Sheets
-	    const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
-	    const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
+	// 1. ENLACES DE GOOGLE SHEETS (CSV)
+	const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
+	const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
 	
-	    // Función para transformar links de Drive en imágenes visibles
-	    function corregirLinkDrive(url) {
-	        if (url.includes('drive.google.com')) {
-	            const regex = /\/d\/([^\/]+)/;
-	            const match = url.match(regex);
-	            if (match && match[1]) {
-	                return `https://docs.google.com/uc?export=view&id=${match[1]}`;
+	// 2. FUNCIÓN PARA LIMPIAR COMAS Y ESPACIOS (Soluciona el error de lectura)
+	function procesarFilaCSV(fila) {
+	    // Esta función separa por comas pero respeta si hay texto entre comillas
+	    return fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	}
+	
+	async function cargarTodo() {
+	    // --- CARGAR SERMONES ---
+	    try {
+	        const resS = await fetch(urlSermones);
+	        const csvS = await resS.text();
+	        const filasS = csvS.split(/\r?\n/).filter(f => f.trim() !== "").slice(1);
+	        const contSermones = document.getElementById('contenedor-sermones');
+	        contSermones.innerHTML = '';
+	
+	        filasS.forEach(fila => {
+	            const col = procesarFilaCSV(fila);
+	            if(col.length >= 3 && col[0].trim() !== "") {
+	                const titulo = col[0].replace(/"/g, "").trim();
+	                const autor = col[1].replace(/"/g, "").trim();
+	                const linkAudio = col[2].replace(/"/g, "").trim();
+	
+	                contSermones.innerHTML += `
+	                    <div class="audio-card d-flex align-items-center mb-3 p-3 bg-white shadow-sm rounded border-start border-danger border-4">
+	                        <div class="flex-grow-1 ms-3">
+	                            <h6 class="mb-0 fw-bold text-dark">${titulo}</h6>
+	                            <small class="text-muted d-block mb-2">${autor}</small>
+	                            <audio controls class="w-100" style="height: 35px;">
+	                                <source src="${linkAudio}" type="audio/mpeg">
+	                                <source src="${linkAudio}" type="audio/mp3">
+	                                Tu navegador no soporta el audio.
+	                            </audio>
+	                        </div>
+	                    </div>`;
 	            }
-	        }
-	        return url;
-	    }
+	        });
+	    } catch (e) { console.error("Error en Sermones:", e); }
 	
-	    async function cargarTodo() {
-	        // 1. CARGAR SERMONES
-	        try {
-	            const resS = await fetch(urlSermones);
-	            const csvS = await resS.text();
-	            // Separamos por líneas y limpiamos espacios vacíos
-	            const filasS = csvS.split(/\r?\n/).filter(f => f.trim() !== "").slice(1);
-	            const contSermones = document.getElementById('contenedor-sermones');
-	            contSermones.innerHTML = '';
+	    // --- CARGAR LIBROS ---
+	    try {
+	        const resL = await fetch(urlLibros);
+	        const csvL = await resL.text();
+	        const filasL = csvL.split(/\r?\n/).filter(f => f.trim() !== "").slice(1);
+	        const contLibros = document.getElementById('contenedor-libros');
+	        contLibros.innerHTML = '';
 	
-	            filasS.forEach(fila => {
-	                const col = fila.split(',');
-	                if(col.length >= 3) {
-	                    contSermones.innerHTML += `
-	                        <div class="audio-card d-flex align-items-center mb-3 p-3 bg-white shadow-sm rounded border-start border-danger border-4">
-	                            <div class="flex-grow-1 ms-3">
-	                                <h6 class="mb-0 fw-bold">${col[0].trim()}</h6>
-	                                <small class="text-muted">${col[1].trim()}</small>
-	                                <audio controls class="w-100 mt-2">
-	                                    <source src="${col[2].trim()}" type="audio/mp3">
-	                                </audio>
-	                            </div>
-	                        </div>`;
-	                }
-	            });
-	        } catch (e) { console.error("Error Sermones:", e); }
+	        filasS.forEach(fila => { // Cambiado a filasL (error corregido)
+	            const col = procesarFilaCSV(fila);
+	            if(col.length >= 4 && col[0].trim() !== "") {
+	                const titulo = col[0].replace(/"/g, "").trim();
+	                const autor = col[1].replace(/"/g, "").trim();
+	                const imgUrl = col[2].replace(/"/g, "").trim();
+	                const pdfUrl = col[3].replace(/"/g, "").trim();
 	
-	        // 2. CARGAR LIBROS
-	        try {
-	            const resL = await fetch(urlLibros);
-	            const csvL = await resL.text();
-	            const filasL = csvL.split(/\r?\n/).filter(f => f.trim() !== "").slice(1);
-	            const contLibros = document.getElementById('contenedor-libros');
-	            contLibros.innerHTML = '';
+	                contLibros.innerHTML += `
+	                    <div class="col-6 col-md-3 mb-4">
+	                        <div class="libro-card text-center">
+	                            <a href="${pdfUrl}" target="_blank">
+	                                <img src="${imgUrl}" class="img-fluid rounded shadow-lg mb-2" 
+	                                     style="width: 100%; height: 220px; object-fit: cover; background: #f0f0f0;"
+	                                     onerror="this.src='https://via.placeholder.com/150x220?text=Libro';">
+	                            </a>
+	                            <h6 class="fw-bold text-dark mb-0 small">${titulo}</h6>
+	                            <p class="text-muted extra-small">${autor}</p>
+	                        </div>
+	                    </div>`;
+	            }
+	        });
+	    } catch (e) { console.error("Error en Libros:", e); }
+	}
 	
-	            filasL.forEach(fila => {
-	                const col = fila.split(',');
-	                if(col.length >= 4) {
-	                    const imgUrl = corregirLinkDrive(col[2].trim());
-	                    contLibros.innerHTML += `
-	                        <div class="col-6 col-md-3">
-	                            <div class="libro-card">
-	                                <a href="${col[3].trim()}" target="_blank">
-	                                    <img src="${imgUrl}" class="img-fluid rounded shadow libro-tapa mb-2" style="min-height:180px; object-fit:cover;">
-	                                </a>
-	                                <h6 class="fw-bold text-dark mb-0">${col[0].trim()}</h6>
-	                                <p class="small text-muted">${col[1].trim()}</p>
-	                            </div>
-	                        </div>`;
-	                }
-	            });
-	        } catch (e) { console.error("Error Libros:", e); }
-	    }
-	
-	    document.addEventListener('DOMContentLoaded', cargarTodo);
-	    </script>
-
+	document.addEventListener('DOMContentLoaded', cargarTodo);
+	</script>
 </body>
 
 </html>
+
 
 
 
