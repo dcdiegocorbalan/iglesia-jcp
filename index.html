@@ -182,58 +182,8 @@
 	<section id="liderazgo" class="py-5 bg-white">
 		<div class="container text-center">
 			<h2 class="fw-bold mb-5">NUESTRO LIDERAZGO</h2>
-			
-			<div class="row g-4 justify-content-center">
-				<div class="col-md-4">
-					<div class="card border-0">
-						<img src="https://via.placeholder.com/300x200" class="card-img-top rounded" alt="Prescott">
-						<div class="card-body">
-							<h5 class="fw-bold">Iglesia Fundadora</h5>
-							<p class="text-muted">The Potter's House - Prescott, AZ</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="col-md-4">
-					<div class="card border-0">
-						<img src="https://via.placeholder.com/300x200" class="card-img-top rounded" alt="Iglesia Líder">
-						<div class="card-body">
-							<h5 class="fw-bold">Iglesia Líder Argentina</h5>
-							<p class="text-muted">La Casa del Alfarero - Central</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="col-md-4">
-					<div class="card border-0">
-						<img src="https://via.placeholder.com/300x200" class="card-img-top rounded" alt="Iglesia Madre">
-						<div class="card-body">
-							<h5 class="fw-bold">Nuestra Iglesia Madre</h5>
-							<p class="text-muted">Directamente desde nuestra herencia espiritual</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="col-md-4">
-					<div class="card border-0 shadow-sm p-3 bg-light">
-						<img src="https://via.placeholder.com/300x300" class="card-img-top rounded-circle shadow" alt="Nosotros">
-						<div class="card-body">
-							<h5 class="fw-bold">Nosotros</h5>
-							<p class="text-muted">Pastores Diego Corbalán y Familia</p>
-							<p class="small">Sirviendo en José C. Paz</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="col-md-4">
-					<div class="card border-0">
-						<img src="https://via.placeholder.com/300x200" class="card-img-top rounded" alt="Iglesia Hija">
-						<div class="card-body">
-							<h5 class="fw-bold">Iglesia Hija</h5>
-							<p class="text-muted">Extendiendo el Reino</p>
-						</div>
-					</div>
-				</div>
+			<div class="row g-4 justify-content-center" id="contenedor-staff">
+				<p class="text-muted">Cargando liderazgo...</p>
 			</div>
 		</div>
 	</section>
@@ -615,6 +565,7 @@
 	// 1. VARIABLES DE ACCESO (Indispensables para que no de error "not defined")
 	const urlSermones = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=0&single=true&output=csv";
 	const urlLibros = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=423736360&single=true&output=csv";
+	const urlStaff = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=1626359048&single=true&output=csv"; // Reemplace este GID por el de su pestaña Staff
 	
 	// 2. FUNCIÓN PARA CORREGIR ENLACES (Drive, Dropbox, Archive)
 	function transformarLink(url) {
@@ -679,7 +630,35 @@
 	        if(cont) cont.innerHTML = html || "No hay libros disponibles.";
 	    } catch (e) { console.error("Error Libros:", e); }
 	}
-	
+	// STAFF (LIDERAZGO)
+	    try {
+	        const res = await fetch(urlStaff + "&t=" + Date.now());
+	        const csv = await res.text();
+	        const filas = csv.split(/\r?\n/).slice(1);
+	        const cont = document.getElementById('contenedor-staff');
+	        let html = '';
+	        filas.forEach(f => {
+	            const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	            if(c.length >= 3 && c[0].trim() !== "") {
+	                const esPastor = c[0].toLowerCase().includes("nosotros");
+	                const claseImg = esPastor ? "rounded-circle shadow mx-auto" : "rounded shadow-sm";
+	                const estiloImg = esPastor ? "width:200px; height:200px;" : "width:100%; height:200px;";
+	                html += `
+	                <div class="col-md-4">
+	                    <div class="card border-0 h-100 ${esPastor ? 'p-3 bg-light' : ''}">
+	                        <img src="${transformarLink(c[2])}" class="card-img-top ${claseImg}" style="object-fit:cover; ${estiloImg} background:#eee;" onerror="this.src='https://placehold.co/300x200?text=Staff'">
+	                        <div class="card-body text-center">
+	                            <h5 class="fw-bold mb-1">${c[0].replace(/"/g, "")}</h5>
+	                            <p class="text-muted small">${c[1].replace(/"/g, "")}</p>
+	                        </div>
+	                    </div>
+	                </div>`;
+	            }
+	        });
+	        if(cont) cont.innerHTML = html;
+	    } catch (e) { console.error("Error Staff:", e); }
+		}
+		
 	// 4. GALERÍA CON AUTOCORRECCIÓN (Si la foto no existe, no muestra el error)
 	const configGaleria = { evangelismos: 1, newman: 5, guarderia: 8, rally: 12 };
 	function generarAlbum(categoria) {
@@ -726,6 +705,7 @@
 	</script>
 </body>
 </html>
+
 
 
 
