@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/glightbox/3.2.0/css/glightbox.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/glightbox/3.2.0/js/glightbox.min.js"></script>
 </head>
 <body>
 
@@ -616,20 +618,25 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		    galeria:  `${baseDirecta}&gid=1325681442`
 		};
 		
-		// 2. UTILIDADES DE TRANSFORMACIÓN
+		// 2. UTILIDADES DE TRANSFORMACIÓN (CORREGIDAS)
 		function transformarLink(url) {
 		    if (!url) return "";
 		    let link = url.trim().replace(/["']/g, "");
-		    // Si es un link de Drive, lo convertimos a link directo de imagen
+		    
+		    // Si es un link de Drive, usamos el servidor de imágenes (evita descargas)
 		    if (link.includes("drive.google.com")) {
 		        let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
-		        if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
+		        if (id && id[1]) {
+		            // Este link es "mágico": muestra la foto sin descargarla
+		            return `https://lh3.googleusercontent.com/u/0/d/${id[1]}`;
+		        }
 		    }
 		    return link;
 		}
 		
 		function limpiarFila(fila) {
-		    // Separa por comas pero respeta las comas dentro de textos entrecomillados
+		    // Esta función limpia las comas raras del Excel
+		    if (!fila) return [];
 		    return fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
 		}
 		
@@ -707,23 +714,29 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		        let html = '';
 		        filas.forEach(f => {
 		            const c = limpiarFila(f);
-		            // Detecta automáticamente qué columna tiene el link de la foto
 		            const linkFoto = c.find(texto => texto.includes("drive.google.com") || texto.includes("archive.org"));
 		            const categoria = (c[0] || "general").toLowerCase().trim();
 		
 		            if(linkFoto) {
 		                const linkDirecto = transformarLink(linkFoto);
+		                // CAMBIO CLAVE: Quitamos target="_blank" y agregamos class="glightbox"
 		                html += `
 		                <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${categoria}">
-		                    <a href="${linkDirecto}" target="_blank">
+		                    <a href="${linkDirecto}" class="glightbox" data-gallery="iglesia">
 		                        <img src="${linkDirecto}" class="img-fluid rounded shadow-sm" 
 		                             style="height:200px; width:100%; object-fit:cover; background:#eee;" 
-		                             onerror="this.src='https://placehold.co/300x200?text=Ver+en+Drive'">
+		                             onerror="this.src='https://placehold.co/300x200?text=Ver+Foto'">
 		                    </a>
 		                </div>`;
 		            }
 		        });
-		        cont.innerHTML = html || '<p class="text-center w-100">Cargando galería...</p>';
+		        cont.innerHTML = html || '<p class="text-center w-100">No hay fotos disponibles.</p>';
+		
+		        // Esto hace que al hacer clic se agranden con flechitas para pasar
+		        if (typeof GLightbox !== 'undefined') {
+		            GLightbox({ selector: '.glightbox' });
+		        }
+		        
 		    }).catch(e => console.error("Error Galeria:", e));
 		}
 		
@@ -755,6 +768,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	</script>
 	</body>
 	</html>
+
 
 
 
