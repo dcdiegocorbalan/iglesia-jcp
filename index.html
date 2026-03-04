@@ -694,25 +694,38 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	    }
 	
 	    // 4. CARGA DE GALERÍA
-	    async function cargarGaleria() {
-	        fetch(urlGaleria + "&t=" + Date.now()).then(r => r.text()).then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            let html = '';
-	            filas.forEach(f => {
-	                const c = limpiarFila(f);
-	                if(c.length >= 2 && c[1] !== "") {
-	                    const linkImg = transformarLink(c[1]);
-	                    html += `
-	                    <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${c[0].toLowerCase()}">
-	                        <a href="${linkImg}" target="_blank">
-	                            <img src="${linkImg}" class="img-fluid rounded shadow-sm" style="height:200px; width:100%; object-fit:cover;" onerror="this.parentElement.parentElement.remove();">
-	                        </a>
-	                    </div>`;
-	                }
-	            });
-	            document.getElementById('contenedor-galeria').innerHTML = html;
-	        });
-	    }
+
+		async function cargarGaleria() {
+		        fetch(urls.galeria + "&t=" + Date.now())
+		        .then(r => r.text())
+		        .then(csv => {
+		            const filas = csv.split(/\r?\n/).slice(1);
+		            const cont = document.getElementById('contenedor-galeria');
+		            if(!cont) return;
+		            
+		            let html = '';
+		            filas.forEach(f => {
+		                const c = limpiarFila(f);
+		                // Buscamos la columna que tenga el link (usualmente la 1 o 2)
+		                const linkFoto = c.find(texto => texto.includes("drive.google.com") || texto.includes("archive.org"));
+		                const categoria = c[0] ? c[0].toLowerCase() : "general";
+		
+		                if(linkFoto) {
+		                    const linkDirecto = transformarLink(linkFoto);
+		                    html += `
+		                    <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${categoria}">
+		                        <a href="${linkDirecto}" target="_blank">
+		                            <img src="${linkDirecto}" class="img-fluid rounded shadow-sm" 
+		                                 style="height:200px; width:100%; object-fit:cover; background:#eee;" 
+		                                 onerror="this.src='https://placehold.co/300x200?text=Error+Link'">
+		                        </a>
+		                    </div>`;
+		                }
+		            });
+		            cont.innerHTML = html || '<p class="text-center w-100">No se encontraron fotos válidas en el Excel.</p>';
+		        })
+		        .catch(err => console.error("Error cargando galería:", err));
+		    }
 	
 	    // 5. FILTROS Y OTROS
 	    function filtrarGaleria(cat) {
@@ -734,6 +747,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	</script>
 	</body>
 	</html>
+
 
 
 
