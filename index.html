@@ -732,14 +732,20 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		        });
 		        cont.innerHTML = html || '<p class="text-center w-100">No hay fotos disponibles.</p>';
 		
-		        // Esto hace que al hacer clic se agranden con flechitas para pasar
-		        if (typeof GLightbox !== 'undefined') {
-		            GLightbox({ selector: '.glightbox' });
-		        }
-		        
-		    }).catch(e => console.error("Error Galeria:", e));
-		}
-		
+				// Configuración para que las fotos NO se vean gigantes y entren en la pantalla
+				        if (typeof GLightbox !== 'undefined') {
+				            GLightbox({
+				                selector: '.glightbox',
+				                touchNavigation: true, // Permite pasar fotos con el dedo en el celular
+				                loop: true,           // Cuando llega a la última, vuelve a la primera
+				                width: '90vw',        // No deja que pase del 90% del ancho de pantalla
+				                height: '85vh',       // No deja que pase del 85% del alto de pantalla
+				                zoomable: true        // Si alguien quiere ver un detalle, puede hacer zoom
+				            });
+				        }
+				        
+				    }).catch(e => console.error("Error Galeria:", e));
+				}
 		// 5. FILTROS Y BOTONES
 		function filtrarGaleria(cat) {
 		    const items = document.querySelectorAll('.category-item');
@@ -768,6 +774,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	</script>
 	</body>
 	</html>
+
 
 
 
