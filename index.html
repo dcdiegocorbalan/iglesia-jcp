@@ -605,145 +605,157 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.in.css">
 
 	<script>
-	    // 1. CONFIGURACIÓN UNIFICADA
-	    const sheetID = "1RehOyzkhu5b_Mc-vqncB98Y0FDlirE7UJBqnu1gkEQw";
-	    const baseDirecta = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv`;
-	
-	    const urls = {
-	        sermones: `${baseDirecta}&gid=0`,
-	        libros:   `${baseDirecta}&gid=423736360`,
-	        staff:    `${baseDirecta}&gid=2102025399`,
-	        galeria:  `${baseDirecta}&gid=1325681442`
-	    };
-	
-	    // 2. HERRAMIENTAS DE TRANSFORMACIÓN
-	    function transformarLink(url) {
-	        if (!url) return "";
-	        let link = url.trim().replace(/["']/g, "");
-	        if (link.includes("drive.google.com")) {
-	            let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
-	            if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
-	        }
-	        return link;
-	    }
-	
-	    function limpiarFila(fila) {
-	        return fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-	    }
-	
-	    // 3. CARGA DE SERMONES, LIBROS Y STAFF
-	    async function cargarTodo() {
-	        const t = Date.now();
-	
-	        // Sermones
-	        fetch(urls.sermones + "&t=" + t).then(r => r.text()).then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-sermones');
-	            if(cont) {
-	                let html = '';
-	                filas.forEach(f => {
-	                    const c = limpiarFila(f);
-	                    if(c[0]) html += `<div class="p-3 bg-white shadow-sm rounded border-start border-danger border-4 mb-3">
-	                        <h6 class="fw-bold mb-0">${c[0]}</h6>
-	                        <small class="text-muted d-block mb-2">${c[1]}</small>
-	                        <audio controls class="w-100"><source src="${transformarLink(c[2])}" type="audio/mpeg"></audio>
-	                    </div>`;
-	                });
-	                cont.innerHTML = html;
-	            }
-	        });
-	
-	        // Libros
-	        fetch(urls.libros + "&t=" + t).then(r => r.text()).then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-libros');
-	            if(cont) {
-	                let html = '';
-	                filas.forEach(f => {
-	                    const c = limpiarFila(f);
-	                    if(c[0]) html += `<div class="col-6 col-md-3 mb-4 text-center">
-	                        <a href="${c[3]}" target="_blank">
-	                            <img src="${transformarLink(c[2])}" class="img-fluid rounded shadow mb-2" style="height:180px; width:100%; object-fit:cover;" onerror="this.src='https://placehold.co/200x280?text=Libro'">
-	                        </a>
-	                        <p class="small fw-bold mb-0">${c[0]}</p>
-	                    </div>`;
-	                });
-	                cont.innerHTML = html;
-	            }
-	        });
-	
-	        // Staff
-	        fetch(urls.staff + "&t=" + t).then(r => r.text()).then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-staff');
-	            if(cont) {
-	                let html = '';
-	                filas.forEach(f => {
-	                    const c = limpiarFila(f);
-	                    if(c[0]) {
-	                        const esPastor = c[0].toLowerCase().includes("nosotros");
-	                        html += `<div class="col-md-4 mb-4 text-center">
-	                            <img src="${transformarLink(c[3])}" class="${esPastor?'rounded-circle':'rounded'} shadow-sm mb-3" style="width:150px; height:150px; object-fit:cover;" onerror="this.src='https://placehold.co/150x150?text=Staff'">
-	                            <h6 class="text-danger fw-bold mb-1">${c[0]}</h6>
-	                            <h5 class="fw-bold">${c[2]}</h5>
-	                        </div>`;
-	                    }
-	                });
-	                cont.innerHTML = html;
-	            }
-	        });
-	    }
-	
-	    // 4. CARGA DE GALERÍA (Búsqueda inteligente)
-	    async function cargarGaleria() {
-	        fetch(urls.galeria + "&t=" + Date.now()).then(r => r.text()).then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-galeria');
-	            if(!cont) return;
-	            
-	            let html = '';
-	            filas.forEach(f => {
-	                const c = limpiarFila(f);
-	                // Busca el link en cualquier columna por si se movieron
-	                const linkFoto = c.find(texto => texto.includes("drive.google.com") || texto.includes("archive.org"));
-	                const categoria = c[0] ? c[0].toLowerCase() : "general";
-	
-	                if(linkFoto) {
-	                    const linkDirecto = transformarLink(linkFoto);
-	                    html += `
-	                    <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${categoria}">
-	                        <a href="${linkDirecto}" target="_blank">
-	                            <img src="${linkDirecto}" class="img-fluid rounded shadow-sm" 
-	                                 style="height:200px; width:100%; object-fit:cover; background:#eee;" 
-	                                 onerror="this.src='https://placehold.co/300x200?text=Ver+en+Drive'">
-	                        </a>
-	                    </div>`;
-	                }
-	            });
-	            cont.innerHTML = html || '<p class="text-center w-100">No hay fotos para mostrar.</p>';
-	        });
-	    }
-	
-	    // 5. FUNCIONES DE INTERACCIÓN
-	    function filtrarGaleria(cat) {
-	        document.querySelectorAll('.category-item').forEach(i => {
-	            i.style.display = (cat === 'todos' || i.dataset.category.includes(cat.toLowerCase())) ? 'block' : 'none';
-	        });
-	    }
-	
-	    function copiarAlias() {
-	        navigator.clipboard.writeText("iccjosecpaz");
-	        alert("¡Alias copiado!");
-	    }
-	
-	    // 6. LANZAMIENTO
-	    window.onload = () => {
-	        cargarTodo();
-	        cargarGaleria();
-	    };
+		// 1. CONFIGURACIÓN GLOBAL
+		const sheetID = "1RehOyzkhu5b_Mc-vqncB98Y0FDlirE7UJBqnu1gkEQw";
+		const baseDirecta = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv`;
+		
+		const urls = {
+		    sermones: `${baseDirecta}&gid=0`,
+		    libros:   `${baseDirecta}&gid=423736360`,
+		    staff:    `${baseDirecta}&gid=2102025399`,
+		    galeria:  `${baseDirecta}&gid=1325681442`
+		};
+		
+		// 2. UTILIDADES DE TRANSFORMACIÓN
+		function transformarLink(url) {
+		    if (!url) return "";
+		    let link = url.trim().replace(/["']/g, "");
+		    // Si es un link de Drive, lo convertimos a link directo de imagen
+		    if (link.includes("drive.google.com")) {
+		        let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
+		        if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
+		    }
+		    return link;
+		}
+		
+		function limpiarFila(fila) {
+		    // Separa por comas pero respeta las comas dentro de textos entrecomillados
+		    return fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+		}
+		
+		// 3. CARGA DE SERMONES, LIBROS Y STAFF
+		async function cargarContenidoPrincipal() {
+		    const t = Date.now();
+		
+		    // Cargar Libros
+		    fetch(urls.libros + "&t=" + t).then(r => r.text()).then(csv => {
+		        const filas = csv.split(/\r?\n/).slice(1);
+		        const cont = document.getElementById('contenedor-libros');
+		        if(!cont) return;
+		        let html = '';
+		        filas.forEach(f => {
+		            const c = limpiarFila(f);
+		            if(c[0]) {
+		                html += `<div class="col-6 col-md-3 mb-4 text-center">
+		                    <a href="${c[3] || '#'}" target="_blank">
+		                        <img src="${transformarLink(c[2])}" class="img-fluid rounded shadow mb-2" style="height:180px; width:100%; object-fit:cover; background:#eee;" onerror="this.src='https://placehold.co/200x280?text=Libro'">
+		                    </a>
+		                    <p class="small fw-bold mb-0">${c[0]}</p>
+		                </div>`;
+		            }
+		        });
+		        cont.innerHTML = html;
+		    });
+		
+		    // Cargar Sermones
+		    fetch(urls.sermones + "&t=" + t).then(r => r.text()).then(csv => {
+		        const filas = csv.split(/\r?\n/).slice(1);
+		        const cont = document.getElementById('contenedor-sermones');
+		        if(!cont) return;
+		        let html = '';
+		        filas.forEach(f => {
+		            const c = limpiarFila(f);
+		            if(c[0]) {
+		                html += `<div class="p-3 bg-white shadow-sm rounded border-start border-danger border-4 mb-3">
+		                    <h6 class="fw-bold mb-0">${c[0]}</h6>
+		                    <small class="text-muted d-block mb-2">${c[1]}</small>
+		                    <audio controls class="w-100"><source src="${transformarLink(c[2])}" type="audio/mpeg"></audio>
+		                </div>`;
+		            }
+		        });
+		        cont.innerHTML = html;
+		    });
+		
+		    // Cargar Staff
+		    fetch(urls.staff + "&t=" + t).then(r => r.text()).then(csv => {
+		        const filas = csv.split(/\r?\n/).slice(1);
+		        const cont = document.getElementById('contenedor-staff');
+		        if(!cont) return;
+		        let html = '';
+		        filas.forEach(f => {
+		            const c = limpiarFila(f);
+		            if(c[0]) {
+		                const esPastor = c[0].toLowerCase().includes("nosotros");
+		                html += `<div class="col-md-4 mb-4 text-center">
+		                    <img src="${transformarLink(c[3])}" class="${esPastor?'rounded-circle':'rounded'} shadow-sm mb-3" style="width:150px; height:150px; object-fit:cover;" onerror="this.src='https://placehold.co/150x150?text=Staff'">
+		                    <h6 class="text-danger fw-bold mb-1">${c[0]}</h6>
+		                    <h5 class="fw-bold">${c[2]}</h5>
+		                </div>`;
+		            }
+		        });
+		        cont.innerHTML = html;
+		    });
+		}
+		
+		// 4. CARGA DE GALERÍA (Búsqueda inteligente de fotos)
+		async function cargarGaleria() {
+		    fetch(urls.galeria + "&t=" + Date.now()).then(r => r.text()).then(csv => {
+		        const filas = csv.split(/\r?\n/).slice(1);
+		        const cont = document.getElementById('contenedor-galeria');
+		        if(!cont) return;
+		        
+		        let html = '';
+		        filas.forEach(f => {
+		            const c = limpiarFila(f);
+		            // Detecta automáticamente qué columna tiene el link de la foto
+		            const linkFoto = c.find(texto => texto.includes("drive.google.com") || texto.includes("archive.org"));
+		            const categoria = (c[0] || "general").toLowerCase().trim();
+		
+		            if(linkFoto) {
+		                const linkDirecto = transformarLink(linkFoto);
+		                html += `
+		                <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${categoria}">
+		                    <a href="${linkDirecto}" target="_blank">
+		                        <img src="${linkDirecto}" class="img-fluid rounded shadow-sm" 
+		                             style="height:200px; width:100%; object-fit:cover; background:#eee;" 
+		                             onerror="this.src='https://placehold.co/300x200?text=Ver+en+Drive'">
+		                    </a>
+		                </div>`;
+		            }
+		        });
+		        cont.innerHTML = html || '<p class="text-center w-100">Cargando galería...</p>';
+		    }).catch(e => console.error("Error Galeria:", e));
+		}
+		
+		// 5. FILTROS Y BOTONES
+		function filtrarGaleria(cat) {
+		    const items = document.querySelectorAll('.category-item');
+		    const categoriaBuscada = cat.toLowerCase().trim();
+		    
+		    items.forEach(i => {
+		        const itemCat = i.dataset.category;
+		        if (categoriaBuscada === 'todos' || itemCat.includes(categoriaBuscada)) {
+		            i.style.display = 'block';
+		        } else {
+		            i.style.display = 'none';
+		        }
+		    });
+		}
+		
+		function copiarAlias() {
+		    navigator.clipboard.writeText("iccjosecpaz");
+		    alert("¡Alias copiado!");
+		}
+		
+		// 6. INICIO AUTOMÁTICO
+		window.onload = () => {
+		    cargarContenidoPrincipal();
+		    cargarGaleria();
+		};
 	</script>
 	</body>
 	</html>
+
 
 
 
