@@ -386,18 +386,28 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		</div>
 	</section>
 
-	<section id="biblioteca-visual" class="py-5 bg-white">
+	<section id="biblioteca-visual" class="py-5 bg-light">
 	    <div class="container">
-	        <div class="text-center mb-5">
-	            <span class="badge bg-danger mb-2">Material Gratuito</span>
-	            <h2 class="fw-bold text-dark">NUESTRA LIBRERÍA</h2>
-	            <div class="mx-auto mb-3" style="width: 50px; height: 3px; background-color: #dc3545;"></div>
-	            <p class="text-muted">Haz clic en la portada para descargar el archivo PDF</p>
+	        <div class="text-center mb-4">
+	            <h2 class="fw-bold">BIBLIOTECA VISUAL</h2>
+	            <div class="mt-3">
+	                <button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('todos')">Todos</button>
+	                <button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('rally')">Rally</button>
+	                <button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('evangelismo')">Conferencia</button>
+	                <button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Concierto</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Pastor invitado</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Compañerismo</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Evangelismo</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Servicio general</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Aniversario</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Discipulado</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Pastor Leonardo y sus iglesias hijas</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Niños</button>
+					<button class="btn btn-outline-danger btn-sm m-1" onclick="filtrarGaleria('iglesia')">Prescott</button>
+	            </div>
 	        </div>
-	
-	        <div id="contenedor-libros" class="row g-4 text-center">
-	            <p class="text-center text-muted w-100">Cargando recursos de la biblioteca virtual...</p>
-	        </div>
+	        <div class="row g-3" id="contenedor-galeria">
+	            </div>
 	    </div>
 	</section>
 
@@ -652,153 +662,160 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.in.css">
+
 	<script>
-	// 1. EL LINK BASE (Sin el signo de pregunta al final)
-	const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub";
+	    // 1. CONFIGURACIÓN DE ENLACES
+	    const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub";
+	    
+	    const urlSermones = `${linkBase}?gid=0&single=true&output=csv`;
+	    const urlLibros   = `${linkBase}?gid=423736360&single=true&output=csv`;
+	    const urlStaff    = `${linkBase}?gid=2102025399&single=true&output=csv`;
+	    // REEMPLACE EL GID DE ABAJO POR EL DE SU NUEVA PESTAÑA "GALERIA"
+	    const urlGaleria  = `${linkBase}?gid=1325681442&single=true&output=csv`;
 	
-	// 2. DEFINICIÓN DE CADA HOJA (Usamos la estructura correcta de Google)
-	const urlSermones = `${linkBase}?gid=0&single=true&output=csv`;
-	const urlLibros   = `${linkBase}?gid=423736360&single=true&output=csv`;
-	const urlStaff    = `${linkBase}?gid=2102025399&single=true&output=csv`;
-	
-	function transformarLink(url) {
-	    if (!url) return "";
-	    let link = url.trim().replace(/["']/g, "");
-	    if (link.includes("drive.google.com")) {
-	        let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
-	        if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
+	    // 2. UTILIDADES
+	    function transformarLink(url) {
+	        if (!url) return "";
+	        let link = url.trim().replace(/["']/g, "");
+	        if (link.includes("drive.google.com")) {
+	            let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
+	            if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
+	        }
+	        return link;
 	    }
-	    return link;
-	}
 	
-	async function cargarTodo() {
-	    // CARGAR SERMONES
-	    fetch(urlSermones + "&t=" + Date.now())
-	        .then(res => res.text())
-	        .then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-sermones');
-	            let html = '';
-	            filas.forEach(f => {
-	                const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-	                if(c.length >= 3 && c[0].trim() !== "") {
-	                    html += `<div class="p-3 bg-white shadow-sm rounded border-start border-danger border-4 mb-3">
-	                        <h6 class="fw-bold mb-0 text-dark">${c[0].replace(/"/g, "")}</h6>
-	                        <small class="text-muted d-block mb-2">${c[1].replace(/"/g, "")}</small>
-	                        <audio controls class="w-100"><source src="${transformarLink(c[2])}" type="audio/mpeg"></audio>
-	                    </div>`;
-	                }
-	            });
-	            if(cont) cont.innerHTML = html;
-	        }).catch(e => console.error("Error Sermones:", e));
-
-	    // CARGAR LIBROS
-	    fetch(urlLibros + "&t=" + Date.now())
-	        .then(res => res.text())
-	        .then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-libros');
-	            let html = '';
-	            filas.forEach(f => {
-	                const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-	                if(c.length >= 4 && c[0].trim() !== "") {
-	                    html += `<div class="col-6 col-md-3 mb-4 text-center">
-	                        <a href="${c[3].trim()}" target="_blank">
-	                            <img src="${transformarLink(c[2])}" class="img-fluid rounded shadow mb-2" style="height:180px; width:100%; object-fit:cover; background:#f8f9fa;" onerror="this.src='https://placehold.co/200x280?text=Libro'">
-	                        </a>
-	                        <p class="small fw-bold mb-0">${c[0].replace(/"/g, "")}</p>
-	                    </div>`;
-	                }
-	            });
-	            if(cont) cont.innerHTML = html;
-	        }).catch(e => console.error("Error Libros:", e));
-
-	    // CARGAR STAFF (Adaptado a sus 4 columnas)
-	    fetch(urlStaff + "&t=" + Date.now())
-	        .then(res => res.text())
-	        .then(csv => {
-	            const filas = csv.split(/\r?\n/).slice(1);
-	            const cont = document.getElementById('contenedor-staff');
-	            let html = '';
-	            filas.forEach(f => {
-	                const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-	                // c[0]=Título, c[1]=Iglesia, c[2]=Pastores, c[3]=URL imagen
-	                if(c.length >= 4 && c[0].trim() !== "") {
-	                    const titulo = c[0].replace(/"/g, "");
-	                    const iglesia = c[1].replace(/"/g, "");
-	                    const pastores = c[2].replace(/"/g, "");
-	                    const esPastor = titulo.toLowerCase().includes("nosotros");
-	                    
-	                    const claseImg = esPastor ? "rounded-circle shadow mx-auto" : "rounded shadow-sm";
-	                    const estiloImg = esPastor ? "width:200px; height:200px;" : "width:100%; height:200px;";
-	                    
-	                    html += `<div class="col-md-4">
-	                        <div class="card border-0 h-100 ${esPastor ? 'p-3 bg-light' : ''}">
-	                            <img src="${transformarLink(c[3])}" class="card-img-top ${claseImg}" style="object-fit:cover; ${estiloImg} background:#eee;" onerror="this.src='https://placehold.co/300x200?text=Staff'">
-	                            <div class="card-body text-center">
-	                                <h6 class="text-danger fw-bold small mb-1">${titulo}</h6>
-	                                <h5 class="fw-bold mb-1">${pastores}</h5>
-	                                <p class="text-muted small mb-0">${iglesia}</p>
+	    // 3. CARGA DE DATOS (Sermones, Libros, Staff)
+	    async function cargarTodo() {
+	        const timestamp = Date.now();
+	
+	        // SERMONES
+	        fetch(urlSermones + "&t=" + timestamp)
+	            .then(res => res.text())
+	            .then(csv => {
+	                const filas = csv.split(/\r?\n/).slice(1);
+	                const cont = document.getElementById('contenedor-sermones');
+	                let html = '';
+	                filas.forEach(f => {
+	                    const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	                    if(c.length >= 3 && c[0].trim() !== "") {
+	                        html += `<div class="p-3 bg-white shadow-sm rounded border-start border-danger border-4 mb-3">
+	                            <h6 class="fw-bold mb-0 text-dark">${c[0].replace(/"/g, "")}</h6>
+	                            <small class="text-muted d-block mb-2">${c[1].replace(/"/g, "")}</small>
+	                            <audio controls class="w-100"><source src="${transformarLink(c[2])}" type="audio/mpeg"></audio>
+	                        </div>`;
+	                    }
+	                });
+	                if(cont) cont.innerHTML = html;
+	            }).catch(e => console.error("Error Sermones:", e));
+	
+	        // LIBROS
+	        fetch(urlLibros + "&t=" + timestamp)
+	            .then(res => res.text())
+	            .then(csv => {
+	                const filas = csv.split(/\r?\n/).slice(1);
+	                const cont = document.getElementById('contenedor-libros');
+	                let html = '';
+	                filas.forEach(f => {
+	                    const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	                    if(c.length >= 4 && c[0].trim() !== "") {
+	                        html += `<div class="col-6 col-md-3 mb-4 text-center">
+	                            <a href="${c[3].trim()}" target="_blank">
+	                                <img src="${transformarLink(c[2])}" class="img-fluid rounded shadow mb-2" style="height:180px; width:100%; object-fit:cover; background:#f8f9fa;" onerror="this.src='https://placehold.co/200x280?text=Libro'">
+	                            </a>
+	                            <p class="small fw-bold mb-0">${c[0].replace(/"/g, "")}</p>
+	                        </div>`;
+	                    }
+	                });
+	                if(cont) cont.innerHTML = html;
+	            }).catch(e => console.error("Error Libros:", e));
+	
+	        // STAFF
+	        fetch(urlStaff + "&t=" + timestamp)
+	            .then(res => res.text())
+	            .then(csv => {
+	                const filas = csv.split(/\r?\n/).slice(1);
+	                const cont = document.getElementById('contenedor-staff');
+	                let html = '';
+	                filas.forEach(f => {
+	                    const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	                    if(c.length >= 4 && c[0].trim() !== "") {
+	                        const titulo = c[0].replace(/"/g, "");
+	                        const pastores = c[2].replace(/"/g, "");
+	                        const esPastor = titulo.toLowerCase().includes("nosotros");
+	                        const claseImg = esPastor ? "rounded-circle shadow mx-auto" : "rounded shadow-sm";
+	                        const estiloImg = esPastor ? "width:200px; height:200px;" : "width:100%; height:200px;";
+	                        
+	                        html += `<div class="col-md-4">
+	                            <div class="card border-0 h-100 ${esPastor ? 'p-3 bg-light' : ''}">
+	                                <img src="${transformarLink(c[3])}" class="card-img-top ${claseImg}" style="object-fit:cover; ${estiloImg} background:#eee;" onerror="this.src='https://placehold.co/300x200?text=Staff'">
+	                                <div class="card-body text-center">
+	                                    <h6 class="text-danger fw-bold small mb-1">${titulo}</h6>
+	                                    <h5 class="fw-bold mb-1">${pastores}</h5>
+	                                    <p class="text-muted small mb-0">${c[1].replace(/"/g, "")}</p>
+	                                </div>
 	                            </div>
-	                        </div>
+	                        </div>`;
+	                    }
+	                });
+	                if(cont) cont.innerHTML = html;
+	            }).catch(e => console.error("Error Staff:", e));
+	    }
+	
+	    // 4. NUEVA GALERÍA DESDE EXCEL
+	    async function cargarGaleria() {
+	        try {
+	            const res = await fetch(urlGaleria + "&t=" + Date.now());
+	            const csv = await res.text();
+	            const filas = csv.split(/\r?\n/).slice(1);
+	            const contenedor = document.getElementById('contenedor-galeria');
+	            if(!contenedor) return;
+	            
+	            let html = '';
+	            filas.forEach(f => {
+	                const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+	                if(c.length >= 2 && c[1].trim() !== "") {
+	                    const categoria = c[0].trim().toLowerCase();
+	                    const linkFoto = transformarLink(c[1]);
+	                    html += `
+	                    <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${categoria}">
+	                        <a href="${linkFoto}" target="_blank">
+	                            <img src="${linkFoto}" class="img-fluid rounded shadow-sm" 
+	                                 style="height:200px; width:100%; object-fit:cover;"
+	                                 onerror="this.parentElement.parentElement.remove();">
+	                        </a>
 	                    </div>`;
 	                }
 	            });
-	            if(cont) cont.innerHTML = html;
-	        }).catch(e => console.error("Error Staff:", e));
-	}
+	            contenedor.innerHTML = html;
+	        } catch (e) { console.error("Error Galería:", e); }
+	    }
 	
-	const configGaleria = { evangelismos: 1, newman: 5, guarderia: 8, rally: 12 };
-	function generarAlbum(categoria) {
-	    const contenedor = document.getElementById('contenedor-galeria');
-	    if(!contenedor) return;
-	    contenedor.innerHTML = ''; 
-	    const cats = categoria === 'todos' ? Object.keys(configGaleria) : [categoria];
-	    cats.forEach(cat => {
-	        for (let i = 1; i <= configGaleria[cat]; i++) {
-	            const img = new Image();
-	            img.src = `img/${cat}/${i}.jpg`;
-	            img.onload = () => {
-	                const div = document.createElement('div');
-	                div.className = `col-6 col-md-4 col-lg-3 mb-3`;
-	                div.innerHTML = `<img src="${img.src}" class="img-fluid rounded shadow-sm">`;
-	                contenedor.appendChild(div);
-	            };
-	        }
-	    });
-	}
-
-	window.onload = () => {
-	    generarAlbum('todos');
-	    cargarTodo();
-	};
-
-	function copiarAlias() {
-		navigator.clipboard.writeText("iccjosecpaz");
-		alert("¡Alias copiado! Muchas gracias por su generosidad.");
-	}
-	function generarAlbum(categoria) {
-	    const contenedor = document.getElementById('contenedor-galeria');
-	    if(!contenedor) return;
-	    contenedor.innerHTML = ''; 
-	    const cats = categoria === 'todos' ? Object.keys(configGaleria) : [categoria];
-	    cats.forEach(cat => {
-	        for (let i = 1; i <= configGaleria[cat]; i++) {
-	            const img = new Image(); // Pre-carga la imagen para verificar si existe
-	            img.src = `img/${cat}/${i}.jpg`;
-	            img.onload = () => {
-	                const div = document.createElement('div');
-	                div.className = `col-6 col-md-4 col-lg-3 mb-3`;
-	                div.innerHTML = `<img src="${img.src}" class="img-fluid rounded shadow-sm">`;
-	                contenedor.appendChild(div);
-	            };
-	            // Si no existe, no hace nada y no ensucia la consola
-	        }
-	    });
-	}
+	    // 5. FILTROS Y COPIADO
+	    function filtrarGaleria(cat) {
+	        const items = document.querySelectorAll('.category-item');
+	        items.forEach(item => {
+	            if (cat === 'todos' || item.getAttribute('data-category') === cat) {
+	                item.style.display = 'block';
+	            } else {
+	                item.style.display = 'none';
+	            }
+	        });
+	    }
+	
+	    function copiarAlias() {
+	        navigator.clipboard.writeText("iccjosecpaz");
+	        alert("¡Alias copiado! Muchas gracias por su generosidad.");
+	    }
+	
+	    // 6. INICIO AL CARGAR PÁGINA
+	    window.onload = () => {
+	        cargarTodo();
+	        cargarGaleria();
+	    };
 	</script>
 </body>
 </html>
+
 
 
 
