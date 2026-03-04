@@ -743,9 +743,13 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 				cargarTodo();
 				cargarGaleria();
 			};
+		console.log("--- CHEQUEO DE PERMISOS ---");
+		fetch(urlLibros).then(r => console.log("Libros accesibles:", r.ok));
+		fetch(urlGaleria).then(r => console.log("Galería accesible:", r.ok));
 		</script>
 	</body>
 	</html>
+
 
 
 
