@@ -562,13 +562,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.in.css">
 	<script>
-	// 1. EL LINK BASE QUE USTED TIENE
-	const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?";
+	// 1. EL LINK BASE (Sin el signo de pregunta al final)
+	const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub";
 	
-	// 2. DEFINICIÓN DE CADA HOJA (Agregamos el ID de cada pestaña al final)
-	const urlSermones = linkBase + "gid=0&single=true&output=csv";
-	const urlLibros   = linkBase + "gid=423736360&single=true&output=csv";
-	const urlStaff    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=2102025399&single=true&output=csv";
+	// 2. DEFINICIÓN DE CADA HOJA (Usamos la estructura correcta de Google)
+	const urlSermones = `${linkBase}?gid=0&single=true&output=csv`;
+	const urlLibros   = `${linkBase}?gid=423736360&single=true&output=csv`;
+	const urlStaff    = `${linkBase}?gid=1626359048&single=true&output=csv`;
 	
 	function transformarLink(url) {
 	    if (!url) return "";
@@ -708,6 +708,7 @@
 	</script>
 </body>
 </html>
+
 
 
 
