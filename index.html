@@ -595,164 +595,136 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.in.css">
 
 	<script>
-			// 1. CONFIGURACIÓN DE ENLACES (ACTUALIZADO)
-		    // Este es el link de publicación de tu nuevo Excel
-		    const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1T5_z5n-C3Yy-D4-R9uV_YmR-r5_xR9U-p9N-z5N-R9uV_YmR/pub"; 
-		    // NOTA: Si el link de arriba no funciona, usaremos el ID directo que es más seguro:
-		    const sheetID = "1RehOyzkhu5b_Mc-vqncB98Y0FDlirE7UJBqnu1gkEQw";
-		    const baseDirecta = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv`;
-		
-		    const urlSermones = `${baseDirecta}&gid=0`;
-		    const urlLibros   = `${baseDirecta}&gid=423736360`;
-		    const urlStaff    = `${baseDirecta}&gid=2102025399`;
-		    const urlGaleria  = `${baseDirecta}&gid=1325681442`;
+	    // 1. CONFIGURACIÓN
+	    const sheetID = "1RehOyzkhu5b_Mc-vqncB98Y0FDlirE7UJBqnu1gkEQw";
+	    const baseDirecta = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv`;
 	
-			// 2. UTILIDADES
-			function transformarLink(url) {
-				if (!url) return "";
-				let link = url.trim().replace(/["']/g, "");
-				if (link.includes("drive.google.com")) {
-					let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
-					if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
-				}
-				return link;
-			}
+	    const urlSermones = `${baseDirecta}&gid=0`;
+	    const urlLibros   = `${baseDirecta}&gid=423736360`;
+	    const urlStaff    = `${baseDirecta}&gid=2102025399`;
+	    const urlGaleria  = `${baseDirecta}&gid=1325681442`;
 	
-			// 3. CARGA DE DATOS (Sermones, Libros, Staff)
-			async function cargarTodo() {
-				const timestamp = Date.now();
+	    // 2. UTILIDAD PARA DRIVE Y LIMPIEZA DE TEXTO
+	    function transformarLink(url) {
+	        if (!url) return "";
+	        let link = url.trim().replace(/["']/g, "");
+	        if (link.includes("drive.google.com")) {
+	            let id = link.match(/\/d\/([^/]+)/) || link.match(/id=([^&]+)/);
+	            if (id) return "https://docs.google.com/uc?export=download&id=" + id[1];
+	        }
+	        return link;
+	    }
 	
-				// CARGAR SERMONES
-				fetch(urlSermones + "&t=" + timestamp)
-					.then(res => res.text())
-					.then(csv => {
-						const filas = csv.split(/\r?\n/).slice(1);
-						const cont = document.getElementById('contenedor-sermones');
-						let html = '';
-						filas.forEach(f => {
-							const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-							if(c.length >= 3 && c[0].trim() !== "") {
-								html += `<div class="p-3 bg-white shadow-sm rounded border-start border-danger border-4 mb-3">
-									<h6 class="fw-bold mb-0 text-dark">${c[0].replace(/"/g, "")}</h6>
-									<small class="text-muted d-block mb-2">${c[1].replace(/"/g, "")}</small>
-									<audio controls class="w-100"><source src="${transformarLink(c[2])}" type="audio/mpeg"></audio>
-								</div>`;
-							}
-						});
-						if(cont) cont.innerHTML = html;
-					}).catch(e => console.error("Error Sermones:", e));
+	    function limpiarFila(fila) {
+	        // Esta función quita las comillas extras que pone Google Sheets
+	        return fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+	    }
 	
-				// CARGAR LIBROS
-				fetch(urlLibros + "&t=" + timestamp)
-					.then(res => res.text())
-					.then(csv => {
-						const filas = csv.split(/\r?\n/).slice(1);
-						const cont = document.getElementById('contenedor-libros');
-						let html = '';
-						filas.forEach(f => {
-							const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-							if(c.length >= 4 && c[0].trim() !== "") {
-								html += `<div class="col-6 col-md-3 mb-4 text-center">
-									<a href="${c[3].trim()}" target="_blank">
-										<img src="${transformarLink(c[2])}" class="img-fluid rounded shadow mb-2" style="height:180px; width:100%; object-fit:cover; background:#f8f9fa;" onerror="this.src='https://placehold.co/200x280?text=Libro'">
-									</a>
-									<p class="small fw-bold mb-0">${c[0].replace(/"/g, "")}</p>
-								</div>`;
-							}
-						});
-						if(cont) cont.innerHTML = html;
-					}).catch(e => console.error("Error Libros:", e));
+	    // 3. CARGA DE DATOS PRINCIPALES
+	    async function cargarTodo() {
+	        const t = Date.now();
 	
-				// CARGAR STAFF
-				fetch(urlStaff + "&t=" + timestamp)
-					.then(res => res.text())
-					.then(csv => {
-						const filas = csv.split(/\r?\n/).slice(1);
-						const cont = document.getElementById('contenedor-staff');
-						let html = '';
-						filas.forEach(f => {
-							const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-							if(c.length >= 4 && c[0].trim() !== "") {
-								const titulo = c[0].replace(/"/g, "");
-								const pastores = c[2].replace(/"/g, "");
-								const esPastor = titulo.toLowerCase().includes("nosotros");
-								const claseImg = esPastor ? "rounded-circle shadow mx-auto" : "rounded shadow-sm";
-								const estiloImg = esPastor ? "width:200px; height:200px;" : "width:100%; height:200px;";
-								
-								html += `<div class="col-md-4 mb-4">
-									<div class="card border-0 h-100 ${esPastor ? 'p-3 bg-light' : ''}">
-										<img src="${transformarLink(c[3])}" class="card-img-top ${claseImg}" style="object-fit:cover; ${estiloImg} background:#eee;" onerror="this.src='https://placehold.co/300x200?text=Staff'">
-										<div class="card-body text-center">
-											<h6 class="text-danger fw-bold small mb-1">${titulo}</h6>
-											<h5 class="fw-bold mb-1">${pastores}</h5>
-											<p class="text-muted small mb-0">${c[1].replace(/"/g, "")}</p>
-										</div>
-									</div>
-								</div>`;
-							}
-						});
-						if(cont) cont.innerHTML = html;
-					}).catch(e => console.error("Error Staff:", e));
-			}
+	        // --- LIBROS ---
+	        fetch(urlLibros + "&t=" + t).then(r => r.text()).then(csv => {
+	            const filas = csv.split(/\r?\n/).slice(1);
+	            let html = '';
+	            filas.forEach(f => {
+	                const c = limpiarFila(f);
+	                if(c.length >= 3 && c[0] !== "") {
+	                    html += `<div class="col-6 col-md-3 mb-4 text-center">
+	                        <a href="${c[3] || '#'}" target="_blank">
+	                            <img src="${transformarLink(c[2])}" class="img-fluid rounded shadow mb-2" style="height:180px; width:100%; object-fit:cover; background:#eee;" onerror="this.src='https://placehold.co/200x280?text=Libro'">
+	                        </a>
+	                        <p class="small fw-bold mb-0">${c[0]}</p>
+	                    </div>`;
+	                }
+	            });
+	            document.getElementById('contenedor-libros').innerHTML = html;
+	        });
 	
-			// 4. CARGAR GALERÍA
-			async function cargarGaleria() {
-				try {
-					const res = await fetch(urlGaleria + "&t=" + Date.now());
-					const csv = await res.text();
-					const filas = csv.split(/\r?\n/).slice(1);
-					const contenedor = document.getElementById('contenedor-galeria');
-					if(!contenedor) return;
-					
-					let html = '';
-					filas.forEach(f => {
-						const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-						if(c.length >= 2 && c[1].trim() !== "") {
-							const categoria = c[0].trim().toLowerCase();
-							const linkFoto = transformarLink(c[1]);
-							html += `
-							<div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${categoria}">
-								<a href="${linkFoto}" target="_blank">
-									<img src="${linkFoto}" class="img-fluid rounded shadow-sm" 
-										 style="height:200px; width:100%; object-fit:cover;"
-										 onerror="this.parentElement.parentElement.remove();">
-								</a>
-							</div>`;
-						}
-					});
-					contenedor.innerHTML = html;
-				} catch (e) { console.error("Error Galería:", e); }
-			}
+	        // --- SERMONES ---
+	        fetch(urlSermones + "&t=" + t).then(r => r.text()).then(csv => {
+	            const filas = csv.split(/\r?\n/).slice(1);
+	            let html = '';
+	            filas.forEach(f => {
+	                const c = limpiarFila(f);
+	                if(c.length >= 3 && c[0] !== "") {
+	                    html += `<div class="p-3 bg-white shadow-sm rounded border-start border-danger border-4 mb-3">
+	                        <h6 class="fw-bold mb-0">${c[0]}</h6>
+	                        <small class="text-muted d-block mb-2">${c[1]}</small>
+	                        <audio controls class="w-100"><source src="${transformarLink(c[2])}" type="audio/mpeg"></audio>
+	                    </div>`;
+	                }
+	            });
+	            document.getElementById('contenedor-sermones').innerHTML = html;
+	        });
 	
-			// 5. FILTROS Y FUNCIONES EXTRAS
-			function filtrarGaleria(cat) {
-				const items = document.querySelectorAll('.category-item');
-				items.forEach(item => {
-					const itemCat = item.getAttribute('data-category');
-					if (cat === 'todos' || itemCat === cat) {
-						item.style.display = 'block';
-					} else {
-						item.style.display = 'none';
-					}
-				});
-			}
+	        // --- STAFF ---
+	        fetch(urlStaff + "&t=" + t).then(r => r.text()).then(csv => {
+	            const filas = csv.split(/\r?\n/).slice(1);
+	            let html = '';
+	            filas.forEach(f => {
+	                const c = limpiarFila(f);
+	                if(c.length >= 4 && c[0] !== "") {
+	                    const esPastor = c[0].toLowerCase().includes("nosotros");
+	                    html += `<div class="col-md-4 mb-4">
+	                        <div class="card border-0 h-100 ${esPastor ? 'p-3 bg-light' : ''}">
+	                            <img src="${transformarLink(c[3])}" class="card-img-top ${esPastor ? 'rounded-circle mx-auto' : 'rounded'}" style="height:200px; width:${esPastor?'200px':'100%'}; object-fit:cover;" onerror="this.src='https://placehold.co/300x200?text=Staff'">
+	                            <div class="card-body text-center">
+	                                <h6 class="text-danger fw-bold small mb-1">${c[0]}</h6>
+	                                <h5 class="fw-bold mb-1">${c[2]}</h5>
+	                                <p class="text-muted small mb-0">${c[1]}</p>
+	                            </div>
+	                        </div>
+	                    </div>`;
+	                }
+	            });
+	            document.getElementById('contenedor-staff').innerHTML = html;
+	        });
+	    }
 	
-			function copiarAlias() {
-				navigator.clipboard.writeText("iccjosecpaz");
-				alert("¡Alias copiado! Muchas gracias por su generosidad.");
-			}
+	    // 4. CARGA DE GALERÍA
+	    async function cargarGaleria() {
+	        fetch(urlGaleria + "&t=" + Date.now()).then(r => r.text()).then(csv => {
+	            const filas = csv.split(/\r?\n/).slice(1);
+	            let html = '';
+	            filas.forEach(f => {
+	                const c = limpiarFila(f);
+	                if(c.length >= 2 && c[1] !== "") {
+	                    const linkImg = transformarLink(c[1]);
+	                    html += `
+	                    <div class="col-6 col-md-4 col-lg-3 mb-3 category-item" data-category="${c[0].toLowerCase()}">
+	                        <a href="${linkImg}" target="_blank">
+	                            <img src="${linkImg}" class="img-fluid rounded shadow-sm" style="height:200px; width:100%; object-fit:cover;" onerror="this.parentElement.parentElement.remove();">
+	                        </a>
+	                    </div>`;
+	                }
+	            });
+	            document.getElementById('contenedor-galeria').innerHTML = html;
+	        });
+	    }
 	
-			// 6. INICIO
-			window.onload = () => {
-				cargarTodo();
-				cargarGaleria();
-			};
-		console.log("--- CHEQUEO DE PERMISOS ---");
-		fetch(urlLibros).then(r => console.log("Libros accesibles:", r.ok));
-		fetch(urlGaleria).then(r => console.log("Galería accesible:", r.ok));
-		</script>
+	    // 5. FILTROS Y OTROS
+	    function filtrarGaleria(cat) {
+	        document.querySelectorAll('.category-item').forEach(i => {
+	            i.style.display = (cat === 'todos' || i.dataset.category === cat) ? 'block' : 'none';
+	        });
+	    }
+	
+	    function copiarAlias() {
+	        navigator.clipboard.writeText("iccjosecpaz");
+	        alert("¡Alias copiado! Muchas gracias por su generosidad.");
+	    }
+	
+	    // 6. INICIO
+	    window.onload = () => {
+	        cargarTodo();
+	        cargarGaleria();
+	    };
+	</script>
 	</body>
 	</html>
+
 
 
 
