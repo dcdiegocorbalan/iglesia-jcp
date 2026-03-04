@@ -353,4 +353,23 @@ html {
 #ubicacion h6 {
     font-size: 1.1rem;
     margin-bottom: 5px;
+
 }
+<style>
+    .nav-pills .nav-link {
+        color: #555;
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link.active {
+        background-color: var(--bs-danger) !important;
+        color: white !important;
+    }
+    #quienes-somos p {
+        line-height: 1.8;
+        color: #444;
+        text-align: justify;
+    }
+    .tab-content {
+        min-height: 400px;
+    }
+</style>
