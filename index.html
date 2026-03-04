@@ -595,13 +595,17 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.in.css">
 
 	<script>
-			// 1. CONFIGURACIÓN DE ENLACES
-			const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub";
-			
-			const urlSermones = `${linkBase}?gid=0&single=true&output=csv`;
-			const urlLibros   = `${linkBase}?gid=423736360&single=true&output=csv`;
-			const urlStaff    = `${linkBase}?gid=2102025399&single=true&output=csv`;
-			const urlGaleria  = `${linkBase}?gid=1325681442&single=true&output=csv`;
+			// 1. CONFIGURACIÓN DE ENLACES (ACTUALIZADO)
+		    // Este es el link de publicación de tu nuevo Excel
+		    const linkBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1T5_z5n-C3Yy-D4-R9uV_YmR-r5_xR9U-p9N-z5N-R9uV_YmR/pub"; 
+		    // NOTA: Si el link de arriba no funciona, usaremos el ID directo que es más seguro:
+		    const sheetID = "1RehOyzkhu5b_Mc-vqncB98Y0FDlirE7UJBqnu1gkEQw";
+		    const baseDirecta = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv`;
+		
+		    const urlSermones = `${baseDirecta}&gid=0`;
+		    const urlLibros   = `${baseDirecta}&gid=423736360`;
+		    const urlStaff    = `${baseDirecta}&gid=2102025399`;
+		    const urlGaleria  = `${baseDirecta}&gid=1325681442`;
 	
 			// 2. UTILIDADES
 			function transformarLink(url) {
@@ -749,6 +753,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		</script>
 	</body>
 	</html>
+
 
 
 
