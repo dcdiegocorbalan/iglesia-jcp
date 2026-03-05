@@ -438,6 +438,17 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	    </div>
 	</section>
 
+	<section id="proximos-eventos" class="py-5 bg-light">
+	    <div class="container text-center">
+	        <h2 class="mb-4">Próximos Eventos</h2>
+	        <div class="row justify-content-center">
+	            <div class="col-md-6">
+	                <img id="imagen-evento-nueva" src="" alt="Cargando evento..." class="img-fluid shadow rounded" style="display:none;">
+	                <p id="mensaje-no-evento-nuevo" class="text-muted">No hay eventos programados por el momento.</p>
+	            </div>
+	        </div>
+	    </div>
+	</section>
 
 
 	<section id="donaciones" class="py-5 text-white position-relative" style="overflow: hidden;">
@@ -787,5 +798,35 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		    cargarGaleria();
 		};
 	</script>
+
+	<script>
+	async function cargarSeccionFlyer() {
+	    const urlFlyer = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=78474002&single=true&output=csv';
+	    
+	    try {
+	        const respuesta = await fetch(urlFlyer + '&t=' + Date.now());
+	        const texto = await respuesta.text();
+	        const filas = texto.split('\n').map(fila => fila.split(','));
+	
+	        if (filas.length > 1 && filas[1][2]) {
+	            let linkImagen = filas[1][2].trim().replace(/["']/g, "");
+	            
+	            if (linkImagen.startsWith('http')) {
+	                const img = document.getElementById('imagen-evento-nueva');
+	                img.src = linkImagen;
+	                img.style.display = 'inline-block';
+	                document.getElementById('mensaje-no-evento-nuevo').style.display = 'none';
+	            }
+	        }
+	    } catch (error) {
+	        console.log("Sección eventos: sin flyer para mostrar");
+	    }
+	}
+	
+	// Esto lo ejecuta sin interferir con sus otros window.onload
+	window.addEventListener('load', cargarSeccionFlyer);
+	</script>
+	
 	</body>
 	</html>
+
