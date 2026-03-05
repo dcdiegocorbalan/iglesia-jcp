@@ -777,26 +777,34 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		// Función para cargar el flyer desde el Excel
 		async function cargarFlyer() {
 		    const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=78474002&single=true&output=csv'; // Use el mismo que usó para las actividades
-		    try {
-		        const response = await fetch(url);
-		        const data = await response.text();
-		        const filas = data.split('\n').slice(1); // Quitamos el encabezado
-		
-		        if (filas.length > 0) {
-		            const columnas = filas[0].split(',');
-		            const linkImagen = columnas[3].trim(); // La columna 3 es la del link
-		
-		            if (linkImagen) {
-		                document.getElementById('imagen-evento').src = linkImagen;
-		                document.getElementById('imagen-evento').style.display = 'block';
-		                document.getElementById('mensaje-no-evento').style.display = 'none';
-		            }
-		        }
-		    } catch (error) {
-		        console.error("Error cargando el flyer:", error);
-		    }
-		}
-		cargarFlyer();
+			try {
+			            const response = await fetch(url);
+			            const data = await response.text();
+			            
+			            // Convertimos el CSV en filas
+			            const filas = data.split('\n').map(row => row.split(','));
+			            
+			            // Buscamos la fila que tenga el flyer (asumiendo que es la segunda fila, columna 3)
+			            // Si el link de la imagen está en la primera fila de datos, columna C:
+			            if (filas.length > 1) {
+			                const linkImagen = filas[1][2].trim(); // Fila 2, Columna 3 (C)
+			
+			                if (linkImagen && linkImagen.startsWith('http')) {
+			                    const imgElement = document.getElementById('imagen-evento');
+			                    imgElement.src = linkImagen;
+			                    imgElement.style.display = 'block';
+			                    document.getElementById('mensaje-no-evento').style.display = 'none';
+			                }
+			            }
+			        } catch (error) {
+			            console.error("Error cargando el evento:", error);
+			        }
+			    }
+			
+			    // Ejecutar la función al cargar la página
+			    document.addEventListener('DOMContentLoaded', cargarProximoEvento);
+			</script>
+	
 		
 		// 5. FILTROS Y BOTONES
 		function filtrarGaleria(cat) {
@@ -826,6 +834,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	</script>
 	</body>
 	</html>
+
 
 
 
