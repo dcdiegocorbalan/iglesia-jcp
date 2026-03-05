@@ -438,17 +438,14 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	    </div>
 	</section>
 
-	<section id="proximos-eventos" class="py-5 bg-light">
-	    <div class="container text-center">
-	        <h2 class="mb-4">Próximos Eventos</h2>
-	        <div class="row justify-content-center">
-	            <div class="col-md-6">
-	                <img id="imagen-evento-nueva" src="" alt="Cargando evento..." class="img-fluid shadow rounded" style="display:none;">
-	                <p id="mensaje-no-evento-nuevo" class="text-muted">No hay eventos programados por el momento.</p>
-	            </div>
-	        </div>
-	    </div>
-	</section>
+    <section id="proximos-eventos" class="py-5 bg-light">
+        <div class="container text-center">
+            <h2 class="mb-4">Próximos Eventos</h2>
+            <div id="contenedor-eventos-dinamico" class="row justify-content-center g-4">
+                </div>
+            <p id="mensaje-no-evento-nuevo" class="text-muted mt-3" style="display:none;">No hay eventos programados por el momento.</p>
+        </div>
+    </section>
 
 
 	<section id="donaciones" class="py-5 text-white position-relative" style="overflow: hidden;">
@@ -799,70 +796,53 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		};
 	</script>
 
-	<script>
-	async function cargarSeccionFlyer() {
-	    const urlFlyer = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=78474002&single=true&output=csv';
-	    
-	    try {
-	        const respuesta = await fetch(urlFlyer + '&t=' + Date.now());
-	        const texto = await respuesta.text();
-	        const filas = texto.split(/\r?\n/).map(f => f.split(','));
-		
-			const img = document.getElementById('imagen-evento-nueva');
-            const vid = document.getElementById('video-evento-nuevo');
+
+    <script>
+    async function cargarSeccionFlyer() {
+        const urlFlyer = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=78474002&single=true&output=csv';
+    
+        try {
+            const respuesta = await fetch(urlFlyer + '&t=' + Date.now());
+            const texto = await respuesta.text();
+            const filas = texto.split(/\r?\n/).map(f => f.split(','));
+
+            const contenedor = document.getElementById('contenedor-eventos-dinamico');
             const msg = document.getElementById('mensaje-no-evento-nuevo');
-			
-	        let contenidoEncontrado = false;
+        
+            contenedor.innerHTML = ""; // Limpiamos antes de cargar
+            let hayContenido = false;
 
-            // Recorremos las primeras filas buscando un link (empezando desde la fila 2)
+            // Empezamos desde la fila 1 (la segunda) y recorremos TODO el Excel
             for (let i = 1; i < filas.length; i++) {
-                // Buscamos el link en la columna C (índice 2)
-       
-				let link = filas[i][2] ? filas[i][2].trim().replace(/["']/g, "") : "";
-			
-			    if (link.startsWith('http')) {
-               
-					const esVideo = /\.(mp4|webm|mov|ogg)/i.test(link);
+                let link = filas[i][2] ? filas[i][2].trim().replace(/["']/g, "") : "";
+                
+                if (link.startsWith('http')) {
+                    hayContenido = true;
+                    const esVideo = /\.(mp4|webm|mov|ogg)/i.test(link);
+                
+                    // Creamos un "div" para cada evento
+                    const col = document.createElement('div');
+                    col.className = "col-md-6 col-lg-4"; // Esto los pone uno al lado del otro en PC
 
-               
-					if (esVideo) {
-                  
-						vid.src = link;
+                    if (esVideo) {
+                        col.innerHTML = `
+                            <video controls class="img-fluid shadow rounded w-100">
+                                <source src="${link}" type="video/mp4">
+                                Tu navegador no soporta video.
+                            </video>`;
+                    } else {
+                        col.innerHTML = `<img src="${link}" class="img-fluid shadow rounded w-100" alt="Evento">`;
+                    }
                 
-						vid.style.display = 'block';
-                 
-						img.style.display = 'none';
-                  
-						vid.load(); // Fuerza al navegador a cargar el video
-             
-					} else {
-                  
-						img.src = link;
-                   
-						img.style.display = 'inline-block';
-                   
-						vid.style.display = 'none';
-              
-					}
-                
-               
-					msg.style.display = 'none'; // OCULTA EL MENSAJE "No hay eventos"
-                
-					contenidoEncontrado = true;
-               
-					break; // Si ya encontró uno, deja de buscar
-            
-				}
-		
-			}
-			if (!contenidoEncontrado) {
-                msg.style.display = 'block';
-                img.style.display = 'none';
-                vid.style.display = 'none';
+                    contenedor.appendChild(col);
+                }
             }
 
+            // Si después de recorrer todo no hubo nada, mostramos el mensaje
+            msg.style.display = hayContenido ? 'none' : 'block';
+
         } catch (error) {
-            console.error("Error en sección eventos:", error);
+            console.error("Error cargando eventos:", error);
         }
     }
 
@@ -884,13 +864,11 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 
 
 
-
-
-
 			
 	
 	</body>
 	</html>
+
 
 
 
