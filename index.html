@@ -631,6 +631,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		    libros:   `${baseDirecta}&gid=423736360`,
 		    staff:    `${baseDirecta}&gid=2102025399`,
 		    galeria:  `${baseDirecta}&gid=1325681442`
+			eventos:  `https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=78474002&single=true&output=csv`
 		};
 		
 		// 2. UTILIDADES DE TRANSFORMACIÓN (CORREGIDAS)
@@ -654,6 +655,25 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		    if (!fila) return [];
 		    return fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
 		}
+
+		// 2. CARGA DE FLYER
+		async function cargarFlyer() {
+            try {
+                const response = await fetch(urls.eventos + "&t=" + Date.now());
+                const data = await response.text();
+                const filas = data.split(/\r?\n/);
+                if (filas.length > 1) {
+                    const columnas = limpiarFila(filas[1]);
+                    const linkImagen = transformarLink(columnas[2]);
+                    if (linkImagen && linkImagen.startsWith('http')) {
+                        const img = document.getElementById('imagen-evento');
+                        img.src = linkImagen;
+                        img.style.display = 'inline-block';
+                        document.getElementById('mensaje-no-evento').style.display = 'none';
+                    }
+                }
+            } catch (e) { console.error("Error Flyer:", e); }
+        }
 		
 		// 3. CARGA DE SERMONES, LIBROS Y STAFF
 		async function cargarContenidoPrincipal() {
@@ -782,10 +802,12 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		}
 		
 		// 6. INICIO AUTOMÁTICO
-		window.onload = () => {
+		window.addEventListener('DOMContentLoaded', () => {
 		    cargarContenidoPrincipal();
 		    cargarGaleria();
+			cargarFlyer();
 		};
 	</script>
 	</body>
 	</html>
+
