@@ -806,40 +806,91 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	    try {
 	        const respuesta = await fetch(urlFlyer + '&t=' + Date.now());
 	        const texto = await respuesta.text();
-	        const filas = texto.split('\n').map(fila => fila.split(','));
-	
-	        if (filas.length > 1 && filas[1][2]) {
-	            let link = filas[1][2].trim().replace(/["']/g, "");
-	            
-	            if (link.startsWith('http')) {
-	                const img = document.getElementById('imagen-evento-nueva');
-					const vid = document.getElementById('video-evento-nuevo');
-                    const msg = document.getElementById('mensaje-no-evento-nuevo');
-	                
-					
-					const esVideo = /\.(mp4|webm|mov|ogg)$/i.test(link);
+	        const filas = texto.split(/\r?\n/).map(f => f.split(','));
+		
+			const img = document.getElementById('imagen-evento-nueva');
+            const vid = document.getElementById('video-evento-nuevo');
+            const msg = document.getElementById('mensaje-no-evento-nuevo');
+			
+	        let contenidoEncontrado = false;
 
-                    if (esVideo) {
-                        vid.src = link;
-                        vid.style.display = 'block';
-                        img.style.display = 'none';
-                    } else {
-                        img.src = link;
-                        img.style.display = 'inline-block';
-                        vid.style.display = 'none';
-                    }
-                    msg.style.display = 'none';
-                }
+            // Recorremos las primeras filas buscando un link (empezando desde la fila 2)
+            for (let i = 1; i < filas.length; i++) {
+                // Buscamos el link en la columna C (índice 2)
+       
+				let link = filas[i][2] ? filas[i][2].trim().replace(/["']/g, "") : "";
+			
+			    if (link.startsWith('http')) {
+               
+					const esVideo = /\.(mp4|webm|mov|ogg)/i.test(link);
+
+               
+					if (esVideo) {
+                  
+						vid.src = link;
+                
+						vid.style.display = 'block';
+                 
+						img.style.display = 'none';
+                  
+						vid.load(); // Fuerza al navegador a cargar el video
+             
+					} else {
+                  
+						img.src = link;
+                   
+						img.style.display = 'inline-block';
+                   
+						vid.style.display = 'none';
+              
+					}
+                
+               
+					msg.style.display = 'none'; // OCULTA EL MENSAJE "No hay eventos"
+                
+					contenidoEncontrado = true;
+               
+					break; // Si ya encontró uno, deja de buscar
+            
+				}
+		
+			}
+			if (!contenidoEncontrado) {
+                msg.style.display = 'block';
+                img.style.display = 'none';
+                vid.style.display = 'none';
             }
+
         } catch (error) {
-            console.log("Sección eventos: error al cargar archivo");
+            console.error("Error en sección eventos:", error);
         }
     }
 
     window.addEventListener('load', cargarSeccionFlyer);
     </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
 	
 	</body>
 	</html>
+
 
 
