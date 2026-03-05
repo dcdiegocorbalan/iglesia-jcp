@@ -630,9 +630,8 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		    sermones: `${baseDirecta}&gid=0`,
 		    libros:   `${baseDirecta}&gid=423736360`,
 		    staff:    `${baseDirecta}&gid=2102025399`,
-		    galeria:  `${baseDirecta}&gid=1325681442`,
-			eventos:  `${baseDirecta}&gid=78474002`
-    };
+		    galeria:  `${baseDirecta}&gid=1325681442`
+		};
 		
 		// 2. UTILIDADES DE TRANSFORMACIÓN (CORREGIDAS)
 		function transformarLink(url) {
@@ -659,24 +658,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		// 3. CARGA DE SERMONES, LIBROS Y STAFF
 		async function cargarContenidoPrincipal() {
 		    const t = Date.now();
-
-			// Cargar Flyer de Eventos
-			fetch(urls.eventos + "&t=" + t).then(r => r.text()).then(csv => {
-				const filas = csv.split(/\r?\n/);
-				if (filas.length > 1) {
-					const c = limpiarFila(filas[1]);
-					const linkImg = transformarLink(c[2]);
-					if (linkImg && linkImg.startsWith('http')) {
-						const el = document.getElementById('imagen-evento');
-						if(el) {
-							el.src = linkImg;
-							el.style.display = 'inline-block';
-							document.getElementById('mensaje-no-evento').style.display = 'none';
-						}
-					}
-				}
-			});
-			
+		
 		    // Cargar Libros
 		    fetch(urls.libros + "&t=" + t).then(r => r.text()).then(csv => {
 		        const filas = csv.split(/\r?\n/).slice(1);
@@ -800,14 +782,10 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 		}
 		
 		// 6. INICIO AUTOMÁTICO
-		window.addEventListener('DOMContentLoaded', () => {
+		window.onload = () => {
 		    cargarContenidoPrincipal();
 		    cargarGaleria();
-			cargarFlyer();
 		};
 	</script>
 	</body>
 	</html>
-
-
-
