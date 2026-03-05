@@ -439,6 +439,18 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	</section>
 
 
+	<section id="proximos-eventos" class="py-5 bg-light">
+	    <div class="container text-center">
+	        <h2 class="mb-4">Próximos Eventos</h2>
+	        <div id="contenedor-flyer" class="row justify-content-center">
+	            <div class="col-md-6">
+	                <img id="imagen-evento" src="" alt="Cargando evento..." class="img-fluid shadow rounded" style="display:none;">
+	                <p id="mensaje-no-evento" class="text-muted">No hay eventos programados por el momento.</p>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+
 
 	<section id="donaciones" class="py-5 text-white position-relative" style="overflow: hidden;">
 		<div class="donacion-overlay"></div>
@@ -761,6 +773,31 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 				        
 				    }).catch(e => console.error("Error Galeria:", e));
 				}
+
+		// Función para cargar el flyer desde el Excel
+		async function cargarFlyer() {
+		    const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIHT8vI-nT7QlWQu19WtukQbnx7XoQTgJewHTFsxU_eaLdMCNYQ9PgwbcM9PN-tnFYzaRVoFPUZ8j2/pub?gid=78474002&single=true&output=csv'; // Use el mismo que usó para las actividades
+		    try {
+		        const response = await fetch(url);
+		        const data = await response.text();
+		        const filas = data.split('\n').slice(1); // Quitamos el encabezado
+		
+		        if (filas.length > 0) {
+		            const columnas = filas[0].split(',');
+		            const linkImagen = columnas[3].trim(); // La columna 3 es la del link
+		
+		            if (linkImagen) {
+		                document.getElementById('imagen-evento').src = linkImagen;
+		                document.getElementById('imagen-evento').style.display = 'block';
+		                document.getElementById('mensaje-no-evento').style.display = 'none';
+		            }
+		        }
+		    } catch (error) {
+		        console.error("Error cargando el flyer:", error);
+		    }
+		}
+		cargarFlyer();
+		
 		// 5. FILTROS Y BOTONES
 		function filtrarGaleria(cat) {
 		    const items = document.querySelectorAll('.category-item');
@@ -789,6 +826,7 @@ En 1978, la primera pareja fue plantada en otra nación: Australia; y descubrimo
 	</script>
 	</body>
 	</html>
+
 
 
 
