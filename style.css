@@ -372,8 +372,7 @@ html {
     .tab-content {
         min-height: 400px;
     }
-</style>
-
+/* El código del botón sin etiquetas de style alrededor */
 .whatsapp-float {
     position: fixed;
     width: 60px;
@@ -381,22 +380,21 @@ html {
     bottom: 20px;
     right: 20px;
     background-color: #25d366;
-    color: #FFF;
+    color: #FFF !important;
     border-radius: 50px;
     text-align: center;
     font-size: 30px;
-    box-shadow: 2px 2px 3px #999;
-    z-index: 1000;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: all 0.3s ease;
 }
 
 .whatsapp-float:hover {
     background-color: #128C7E;
-    color: #FFF;
+    color: #FFF !important;
     transform: scale(1.1);
 }
-
